@@ -1252,7 +1252,14 @@ function resetAll(){
   if(!confirm('清空全部勾选、打分与第二步名单，重新开始？此操作不可撤销。')) return;
   state.answers = {}; state.shortlist = []; state.step = 0;
   state.ui = { step1:{q:'',onlyUn:false,autoNext:true,dense:false,keyhintShown:false}, step2:{sort:'order'} };
-  save(); go(0); renderBankOverview();
+  save();
+  // 修复：主动刷所有视图 DOM（之前只 save() 不刷，导致 view-1 row 的 data-v/.on 残留、view-2/3 子元素残留）
+  // resetAll 必须在 go(0) 之前调，因为视图刷新依赖当前 step，且 view-2/3 即使 hidden 元素也存在
+  reRenderBank();      // view-1：重建 s1List → 清掉 dataset.v / .on 类 / s1N3-N1 统计
+  updateForStep2();    // view-2：s2Empty 显示 + tbody.innerHTML='' + 排行清空 + 孤儿卡清空
+  updateForStep3();    // view-3：摘要 / 分组 / 核心 / 全部清单 / 行动建议全部清空
+  go(0);
+  renderBankOverview();
 }
 
 /* 导入答案 JSON 在 M5 完整实现（见下方 s3ImportBtn 绑定）。开始页的"导入答案"按钮也共用同一逻辑。 */

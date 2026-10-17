@@ -492,6 +492,97 @@ const p1 = await evalExpr(`
 check('s3Back2 → step=2', p1.s2 === 2);
 check('s3Back0 → step=0', p1.s0 === 0);
 
+console.log('\n=== R) resetAll 主动刷全部视图（修复前 view-1 row 残留 data-v） ===');
+const r1 = await evalExpr(`
+  // 准备：标 6 个 mark=3 + 给其中 4 个打分 + sync + 进 view-2
+  __VT__.state.answers = {};
+  __VT__.state.shortlist = [];
+  __VT__.go(1);
+  await new Promise(r => setTimeout(r, 200));
+  ['v001','v005','v010','v020','v030','v040'].forEach(id => __VT__.setMarkS1(id, 3));
+  ['v002','v007'].forEach(id => __VT__.setMarkS1(id, 2));
+  __VT__.syncFromStep1();
+  __VT__.state.answers.v001.importance = 5; __VT__.state.answers.v001.consistency = 5;
+  __VT__.state.answers.v005.importance = 5; __VT__.state.answers.v005.consistency = 2;
+  __VT__.state.answers.v010.importance = 4; __VT__.state.answers.v010.consistency = 3;
+  __VT__.state.answers.v020.importance = 5; __VT__.state.answers.v020.consistency = 3;
+  await new Promise(r => setTimeout(r, 200));
+  __VT__.go(2);
+  await new Promise(r => setTimeout(r, 200));
+
+  const beforeReset = {
+    s1RowsWithV: document.querySelectorAll('#s1List .s1-row[data-v]').length,
+    s2TbodyRows: document.querySelectorAll('#s2Body tr').length,
+    s2RankRows: document.querySelectorAll('#s2Rank .s2-rank-row').length,
+  };
+
+  // 回开始页点 resetAll
+  window.confirm = () => true;
+  __VT__.go(0);
+  await new Promise(r => setTimeout(r, 100));
+  document.getElementById('btnResetAll').click();
+  await new Promise(r => setTimeout(r, 300));
+
+  // 不切视图，直接看各 view 的 DOM 残留
+  const immediate = {
+    s1RowsWithV: document.querySelectorAll('#s1List .s1-row[data-v]').length,
+    s2TbodyRows: document.querySelectorAll('#s2Body tr').length,
+    s2RankRows: document.querySelectorAll('#s2Rank .s2-rank-row').length,
+    s2Scored: document.getElementById('s2Scored').textContent,
+    s2N3: document.getElementById('s2N3').textContent,
+    s3SummaryValue: document.querySelector('#s3Summary b').textContent,
+    s3CoreRows: document.querySelectorAll('#s3Core tbody tr').length,
+    s3AllRows: document.querySelectorAll('#s3All .s3-all-row').length,
+  };
+
+  // state 也应该清空
+  const afterState = {
+    answers: Object.keys(__VT__.state.answers).length,
+    shortlist: __VT__.state.shortlist.length,
+    step: __VT__.state.step,
+  };
+
+  return { beforeReset, immediate, afterState };
+`);
+check('reset 前 view-1 有 11 行 data-v（D 测试残留 + R 测试新增）', r1.beforeReset.s1RowsWithV === 11);
+check('reset 前 view-2 有 6 行 tbody', r1.beforeReset.s2TbodyRows === 6);
+check('reset 前 view-2 有 4 行排行', r1.beforeReset.s2RankRows === 4);
+check('reset 后 view-1 row data-v 全清（=0）', r1.immediate.s1RowsWithV === 0);
+check('reset 后 view-2 tbody 全清（=0）', r1.immediate.s2TbodyRows === 0);
+check('reset 后 view-2 排行 全清（=0）', r1.immediate.s2RankRows === 0);
+check('reset 后 s2Scored = "0 / 0"', r1.immediate.s2Scored === '0 / 0');
+check('reset 后 s2N3 = "0"', r1.immediate.s2N3 === '0');
+check('reset 后 view-3 摘要 = "0 / 154"', r1.immediate.s3SummaryValue === '0 / 154');
+check('reset 后 view-3 核心价值 0 行', r1.immediate.s3CoreRows === 0);
+check('reset 后 view-3 全部清单 0 行', r1.immediate.s3AllRows === 0);
+check('reset 后 state.answers = {}', r1.afterState.answers === 0);
+check('reset 后 state.shortlist = []', r1.afterState.shortlist === 0);
+check('reset 后 state.step = 0', r1.afterState.step === 0);
+
+// 验证：reset 后用户重新进 view-1，应该一切干净（顶部统计 + UI 控件）
+const r2 = await evalExpr(`
+  __VT__.go(1);
+  // 等到 onboarding setTimeout 250ms 触发
+  await new Promise(r => setTimeout(r, 600));
+  return {
+    n3: document.getElementById('s1N3').textContent,
+    n2: document.getElementById('s1N2').textContent,
+    n1: document.getElementById('s1N1').textContent,
+    rowsWithV: document.querySelectorAll('#s1List .s1-row[data-v]').length,
+    // 同时验证 search 框被清空（ui 重置了）
+    searchValue: document.getElementById('s1Q').value,
+    // onboarding 气泡会被重新弹（keyhintShown 被重置为 false）
+    onboardShown: !document.getElementById('s1Onboard').hidden,
+    keyhintShown: __VT__.state.ui.step1.keyhintShown,
+  };
+`);
+check('reset 后进 view-1: s1N3=0', r2.n3 === '0');
+check('reset 后进 view-1: s1N2=0', r2.n2 === '0');
+check('reset 后进 view-1: s1N1=0', r2.n1 === '0');
+check('reset 后进 view-1: rowsWithV=0', r2.rowsWithV === 0);
+check('reset 后进 view-1: 搜索框清空', r2.searchValue === '');
+check('reset 后进 view-1: onboarding 重新弹出', r2.onboardShown === true);
+
 console.log('\n=== Q) Errors ===');
 if(pageErrors.length){ failed++; console.log('✗ page errors:'); pageErrors.forEach(e => console.log(' ', e)); }
 else { passed++; console.log('✓ 0 page error'); }
