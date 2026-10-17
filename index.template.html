@@ -1,0 +1,2734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>价值观梳理工具</title>
+<style>
+  :root{
+    --bg:#f6f5f2; --card:#fff; --text:#1f2328; --muted:#767b83;
+    --line:#e5e2db; --line2:#d7d4cc;
+    --accent:#2f6f6b; --accent-soft:#e8f1f0;        /* 第一步强调色（沿用价值观清单） */
+    --accent2:#1a7fa8; --accent2-soft:#e6f2f8;       /* 第二步强调色（沿用核心价值打分表） */
+    --c3:#c93a3a; --c2:#b0791a; --c1:#7b8290;
+    --gap:#c93a3a; --ok:#2f8a4c;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font:15px/1.6 "PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:0 18px 120px}
+
+  /* ---------- 顶部步骤条 ---------- */
+  .steps{
+    display:flex; gap:0; background:var(--card);
+    border:1px solid var(--line); border-radius:12px;
+    margin:16px auto 0; max-width:940px; overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.02);
+  }
+  .step{
+    flex:1; padding:13px 18px; border-right:1px solid var(--line);
+    display:flex; align-items:center; gap:10px; cursor:pointer;
+    transition:.12s; background:#fff; user-select:none;
+  }
+  .step:last-child{ border-right:none; }
+  .step:hover{ background:#faf9f7; }
+  .step .num{
+    width:26px; height:26px; border-radius:50%;
+    background:#ecebe5; color:#5c626a;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:12.5px; flex-shrink:0;
+  }
+  .step .lab{ font-size:13.5px; color:#5c626a; font-weight:600; }
+  .step .chk{ margin-left:auto; font-size:11.5px; color:var(--ok); opacity:0; font-weight:600; }
+  .step.on{ background:var(--accent); color:#fff; }
+  .step.on .num{ background:rgba(255,255,255,.22); color:#fff; }
+  .step.on .lab{ color:#fff; }
+  .step.on .chk{ opacity:1; color:#fff; }
+  .step.done .num{ background:var(--accent); color:#fff; }
+  .step.done .lab{ color:var(--accent); }
+  .step.done .chk{ opacity:1; }
+
+  /* ---------- 视图 ---------- */
+  .view{ display:none; }
+  .view.on{ display:block; }
+
+  /* ---------- 通用 ---------- */
+  .card{
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:18px 20px; margin-top:18px;
+  }
+  .card.compact{ padding:14px 16px; }
+  h2{ font-size:17px; margin:0 0 8px; font-weight:700; letter-spacing:.3px; }
+  h2 small{ font-weight:400; color:var(--muted); font-size:13px; margin-left:6px; letter-spacing:0; }
+
+  .btn{
+    border:1px solid var(--line2); background:#fff; color:#3d4249;
+    border-radius:8px; padding:7px 14px; font-size:13.5px;
+    cursor:pointer; font-family:inherit; transition:.15s;
+  }
+  .btn:hover{ border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
+  .btn.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn.primary:hover{ background:#265a57; color:#fff; }
+  .btn.ghost{ border-color:transparent; background:transparent; }
+  .btn:disabled{ opacity:.55; cursor:not-allowed; }
+  .btn:disabled:hover{ border-color:var(--line2); color:#3d4249; background:#fff; }
+
+  /* banner：localStorage 禁用提示 */
+  .banner{
+    display:none; margin:14px auto 0; max-width:940px;
+    padding:9px 14px; border-radius:8px;
+    background:#fdf3e3; border:1px solid #efd9b0;
+    color:#8a6314; font-size:12.5px;
+  }
+  .banner.show{ display:block; }
+
+  /* 调试条 */
+  .debugrp{ position:fixed; right:14px; bottom:14px; z-index:40;
+    font:11.5px ui-monospace,Consolas,monospace; color:#5c626a;
+    background:rgba(255,255,255,.92); border:1px solid var(--line);
+    border-radius:8px; padding:5px 9px; max-width:380px;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+  }
+  .debugrp b{ color:var(--accent); font-weight:700; }
+  .debugrp.ok{ color:var(--ok); }
+  .debugrp.bad{ color:var(--c3); }
+
+  /* 占位卡片（步骤1/2/3 在 M1 阶段） */
+  .ph{ padding:14px; background:#faf9f7; border:1px dashed var(--line2);
+    border-radius:8px; color:var(--muted); font-size:13px; }
+
+  kbd{ display:inline-block; border:1px solid var(--line2);
+    border-bottom-width:2px; border-radius:5px;
+    padding:0 5px; font-size:11.5px;
+    font-family:ui-monospace,Consolas,monospace; background:#faf9f7; color:#4b5159; }
+
+  @media (max-width:700px){
+    .steps{ flex-direction:column; }
+    .step{ border-right:none; border-bottom:1px solid var(--line); }
+    .step:last-child{ border-bottom:none; }
+  }
+  /* ============================================================
+     M2 · 第一步（题库勾选）
+     ============================================================ */
+  .s1-card{ padding:14px 16px; margin-top:18px; }
+  .s1-stats{ display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--muted); align-items:center; margin-top:6px; }
+  .s1-stats b{ color:var(--text); font-weight:600; }
+  .s1-tools{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center; }
+  .s1-tools .s1-search{ flex:1; min-width:180px; border:1px solid var(--line2); border-radius:8px;
+    padding:6px 11px; font-size:13px; font-family:inherit; background:#fff; color:var(--text); }
+  .s1-tools .s1-search:focus{ outline:none; border-color:var(--accent); }
+
+  .s1-list{ margin-top:14px; }
+  .s1-sec{ margin-top:22px; }
+  .s1-sec:first-child{ margin-top:6px; }
+  .s1-sec-head{ position:sticky; top:0; z-index:10; background:var(--bg);
+    padding:9px 0 7px; display:flex; align-items:baseline; gap:10px;
+    border-bottom:2px solid var(--line2); }
+  .s1-sec-head h3{ margin:0; font-size:15px; font-weight:700; letter-spacing:.6px; }
+  .s1-sec-head .prog{ font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; margin-left:auto; }
+  .s1-sec-head .custom-mark{ font-size:11.5px; color:var(--accent); background:var(--accent-soft);
+    border:1px solid #cfe2e0; border-radius:99px; padding:0 8px; line-height:18px; font-weight:600; }
+
+  .s1-row{ display:grid; grid-template-columns:34px 1fr auto; gap:12px; align-items:center;
+    background:#fff; border:1px solid var(--line); border-left:4px solid #e5e2db;
+    border-radius:10px; padding:9px 12px; margin-top:8px; transition:.12s; }
+  .s1-row:hover{ border-color:var(--line2); border-left-color:#c9c6bf; }
+  .s1-row:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+  .s1-row[data-v="3"]{ border-left-color:var(--c3); }
+  .s1-row[data-v="2"]{ border-left-color:var(--c2); }
+  .s1-row[data-v="1"]{ border-left-color:var(--c1); }
+  .s1-row.hide{ display:none; }
+
+  .s1-idx{ font-size:12px; color:#b3b0a8; text-align:right; font-variant-numeric:tabular-nums; }
+  .s1-info{ min-width:0; }
+  .s1-name{ font-weight:600; font-size:14.5px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .s1-def{ font-size:12.5px; color:var(--muted); line-height:1.5; margin-top:1px; word-break:break-word; }
+  .s1-tag{ font-size:10.5px; font-weight:400; color:var(--accent);
+    background:var(--accent-soft); border:1px solid #cfe2e0;
+    border-radius:99px; padding:0 6px; line-height:16px; }
+  /* 保留 .merged 类位置以防历史 state 含此名，但是没有"已合并"徽标展示了 */
+
+  body.dense .s1-def{ display:none; }
+
+  /* ===========================================================
+     M4 · 第二步打分表 · 重要性/一致性/差距/排行
+     =========================================================== */
+  /* 第二步与第一步共用主色系：
+     重要性 = 强调绿 var(--accent) 系列
+     一致性 = 紫蓝色 #6f5fb1 系列
+     差距 = 红 #c93a3a / 绿 #2d8b3e */
+  :root{
+    --c-imp: #2a8079;
+    --c-imp-bg: #e3f0ee;
+    --c-imp-bd: #b6d7d2;
+    --c-con: #6f5fb1;
+    --c-con-bg: #ece5f6;
+    --c-con-bd: #ccc1e4;
+    --c-gap-bad: #c93a3a;
+    --c-gap-good: #2d8b3e;
+  }
+
+  /* 顶部统计 + 操作 */
+  .s2-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:4px; }
+  .s2-stats > div{
+    background:#fbf8ee; border:1px solid #ecdfaf; border-radius:8px;
+    padding:8px 10px; display:flex; flex-direction:column; gap:2px;
+  }
+  .s2-stats small{ font-size:11.5px; color:var(--muted); }
+  .s2-stats b{ font-size:16px; color:var(--text); }
+  .s2-stats b.warn{ color:var(--c-gap-bad); }
+  .s2-stats b.ok{ color:var(--c-gap-good); }
+
+  .s2-tools{
+    display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px;
+    padding-top:14px; border-top:1px dashed #e4e1d8;
+  }
+  .s2-tools .btn{ font-size:13px; }
+  .s2-tools select{
+    font:inherit; font-size:13px; padding:5px 8px; border-radius:6px;
+    border:1px solid var(--line2); background:#fff;
+  }
+
+  /* 主表：grid 行 (序号|价值词释义|重要性|一致性|差距|移除) */
+  .s2-table-card{ padding:0; overflow:hidden; }
+  .s2-table{ width:100%; border-collapse:collapse; }
+  .s2-table thead th{
+    font-size:12.5px; font-weight:600; color:var(--muted); text-align:left;
+    padding:10px 8px; border-bottom:1px solid var(--line); background:#faf8f0;
+    white-space:nowrap;
+  }
+  .s2-table tbody tr{ border-bottom:1px solid #efebde; }
+  .s2-table tbody tr:nth-child(even){ background:#fbf8ee22; }
+  .s2-table tbody tr.is-orphan{ background:#fff7f3; }
+  .s2-table tbody tr.is-orphan td.orphan-tag{
+    background:#fbe9e0; color:#a02b2b; font-size:11.5px; padding:2px 6px;
+    border-radius:99px; border:1px solid #f1c0c0;
+  }
+  .s2-table td{ padding:10px 8px; vertical-align:middle; font-size:13.5px; }
+  .s2-table .idx{ color:var(--muted); font:12px ui-monospace,monospace; width:32px; text-align:right; padding-right:6px; }
+  .s2-table .name{ padding-right:14px; }
+  .s2-table .name .nm{ font-weight:600; }
+  .s2-table .name .dc{ color:var(--muted); font-size:11.5px; display:block; margin-top:2px; }
+  .s2-table .name .rm-tag{ font-size:10.5px; color:#a02b2b; background:#fbe4e4; border:1px solid #f1c0c0; padding:0 6px; border-radius:99px; margin-left:6px; }
+  .s2-table .score-col{ width:156px; }
+  .s2-table .gap-col{ width:80px; text-align:center; font:600 13.5px ui-monospace,monospace; }
+  .s2-table .op-col{ width:36px; text-align:center; }
+  .s2-table .op-col button{
+    width:24px; height:24px; line-height:1; padding:0; border:1px solid transparent;
+    background:transparent; cursor:pointer; border-radius:6px;
+    font:14px ui-monospace,monospace; color:var(--muted); transition:.12s;
+  }
+  .s2-table .op-col button:hover{ background:#fbe4e4; color:#a02b2b; border-color:#f1c0c0; }
+
+  /* 0-5 单选按钮组 */
+  .sc6{ display:inline-flex; gap:3px; }
+  .sc6 button{
+    width:22px; height:26px; line-height:1; padding:0;
+    border:1px solid var(--line2); background:#fff; color:var(--text);
+    font:12.5px ui-monospace,monospace; border-radius:5px; cursor:pointer; transition:.12s;
+  }
+  .sc6 button:hover{ background:#f3f1ec; }
+  .sc6.imp button.on{ background:var(--c-imp); border-color:var(--c-imp); color:#fff; font-weight:600; }
+  .sc6.con button.on{ background:var(--c-con); border-color:var(--c-con); color:#fff; font-weight:600; }
+  .sc6 button.muted{ color:var(--muted); }
+
+  /* 差距徽标 */
+  .s2-table .gap-col .gp{ font-size:12.5px; padding:2px 8px; border-radius:99px; display:inline-block; min-width:28px; }
+  .s2-table .gap-col .gp.bad{ background:#fbe4e4; color:#a02b2b; border:1px solid #f1c0c0; }
+  .s2-table .gap-col .gp.bad-huge{ background:#c93a3a; color:#fff; }
+  .s2-table .gap-col .gp.warn{ background:#fdf2d4; color:#8e6318; border:1px solid #ecd9a2; }
+  .s2-table .gap-col .gp.ok{ background:#e7f3e7; color:#2d6e2d; border:1px solid #b6dcb6; }
+  .s2-table .gap-col .gp.zero{ background:#eee; color:#888; }
+
+  /* 差距排行 */
+  .s2-rank-card{ }
+  .s2-rank{ display:flex; flex-direction:column; gap:5px; }
+  .s2-rank-row{
+    display:grid; grid-template-columns:30px 1fr 60px 60px 90px;
+    gap:10px; align-items:center; font-size:13px;
+  }
+  .s2-rank-row .rank{ color:var(--muted); font:11.5px ui-monospace,monospace; text-align:right; }
+  .s2-rank-row .name{ font-weight:600; }
+  .s2-rank-row .bar-wrap{ position:relative; height:18px; background:#f4f1e6; border-radius:4px; overflow:hidden; }
+  .s2-rank-row .bar-bar{ position:absolute; left:0; top:0; height:100%; background:var(--c-gap-bad); }
+  .s2-rank-row .bar-bar.zero{ background:var(--c-gap-good); }
+  .s2-rank-row .nums{ font:12px ui-monospace,monospace; color:var(--muted); text-align:right; }
+
+  /* 第二步骤入项目池弹窗 */
+  .s2-addmodal{ position:fixed; inset:0; background:rgba(0,0,0,.32);
+    display:flex; align-items:center; justify-content:center; z-index:100; }
+  .s2-addmodal .box{ background:#fff; border-radius:12px; padding:18px 22px;
+    width:min(520px, 92vw); max-height:80vh; overflow:auto;
+    box-shadow:0 6px 24px rgba(0,0,0,.18); }
+  .s2-addmodal h3{ margin:0 0 12px; font-size:15.5px; }
+  .s2-addmodal ul{ list-style:none; margin:0; padding:0; max-height:50vh; overflow:auto; }
+  .s2-addmodal ul li{
+    display:flex; align-items:flex-start; gap:10px; padding:8px 4px;
+    border-bottom:1px solid #efebde; cursor:pointer;
+  }
+  .s2-addmodal ul li:hover{ background:#fbf8ee; }
+  .s2-addmodal ul li .nm{ font-weight:600; }
+  .s2-addmodal ul li .dc{ color:var(--muted); font-size:11.5px; display:block; margin-top:2px; }
+  .s2-addmodal ul li .gr{ color:var(--muted); font:11.5px ui-monospace,monospace; margin-right:6px; }
+  .s2-addmodal ul li input[type=checkbox]{ margin-top:4px; }
+  .s2-addmodal .actions{ display:flex; gap:8px; margin-top:14px; justify-content:flex-end; }
+
+  /* 被第一步取消标记的孤儿卡片 */
+  .s2-orphan-card{ border-color:#f1c0c0; background:#fdf3f0; }
+  .s2-orphan-card ul{ margin:6px 0 0; padding-left:18px; }
+  .s2-orphan-card ul li{ font-size:13px; line-height:1.7; }
+  .s2-orphan-card ul li .rm-tag{ font-size:10.5px; color:#a02b2b; background:#fbe4e4; border:1px solid #f1c0c0; padding:0 6px; border-radius:99px; margin-left:6px; }
+
+  /* 第二步骤入空状态 */
+  .s2-empty{ padding:38px 16px; text-align:center; color:var(--muted); font-size:14px; line-height:1.85; }
+
+  /* 第一步密集模式的窄屏：把表格压成单列 */
+  @media (max-width:720px){
+    .s2-stats{ grid-template-columns:repeat(2,1fr); }
+    .s2-table thead th,
+    .s2-table .idx, .s2-table .op-col{ display:none; }
+    .s2-table .score-col{ display:block; padding-top:0; }
+    .s2-table tr{ display:block; padding:10px 12px; }
+    .s2-table td{ display:block; padding:4px 0; }
+    .s2-table .name{ padding-right:0; }
+    .s2-table .name + .score-col,
+    .s2-table .name + .score-col + .score-col{ display:flex; align-items:center; gap:8px; }
+  }
+  @media print{
+    .s2-tools, .s2-rank-card, .s2-orphan-card, .s2-addmodal{ display:none !important; }
+    .s2-table .op-col{ display:none; }
+    .s2-table th, .s2-table td{ border-color:#ccc; }
+  }
+
+  /* 旧的 = 历史 s1-row.is-focused 留给 M2，下面是 s2-table 焦点 */
+  /* 不是 M4 重写 */
+
+  /* M3 · 题库管理 · 行内编辑/删除按钮 · 行侧工具行 */
+  .s1-row{ position:relative; }
+  .s1-actions{ display:flex; gap:3px; flex-shrink:0; align-items:flex-start; padding-top:2px; }
+  /* 默认题隐藏编辑/删除 · 自建题显示并允许 hover 高亮 */
+  .s1-row:not(.is-custom) .s1-actions{ display:none; }
+  /* 自建题默认就让 actions 露出来（用户随时能找到删除按钮） */
+  .s1-row.is-custom .s1-actions{ display:flex; }
+  .s1-act{ width:24px; height:24px; line-height:1; padding:0; border:1px solid transparent;
+    background:transparent; cursor:pointer; border-radius:6px; font:13px ui-monospace,monospace;
+    color:var(--muted); transition:.12s; }
+  .s1-act:hover{ background:#eee; color:var(--text); }
+  .s1-act.del:hover{ background:#fbe4e4; color:#a02b2b; border-color:#f1c0c0; }
+  .s1-act.del{ color:#a02b2b; }
+
+  /* 编辑态：行内 input/textarea 替代 name/desc；隐藏选项按钮列 */
+  .s1-row.editing .s1-opts{ display:none; }
+  .s1-row.editing .s1-def{ display:none; }
+  .s1-row.editing .s1-idx{ display:none; }
+  .s1-row.editing .s1-actions{ display:flex; }
+  .s1-edit{ display:flex; flex-direction:column; gap:6px; grid-column:2 / -1; }
+  .s1-edit input, .s1-edit textarea{
+    font-family:inherit; font-size:13.5px; border:1px solid var(--line2); border-radius:6px;
+    padding:6px 8px; background:#fff; color:var(--text); resize:vertical;
+  }
+  .s1-edit input:focus, .s1-edit textarea:focus{ outline:2px solid var(--accent-soft); border-color:var(--accent); }
+  .s1-edit .s1-edit-meta{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .s1-edit .s1-edit-meta select{ font-size:12.5px; padding:3px 6px; border-radius:5px; border:1px solid var(--line2); }
+  .s1-edit .s1-edit-meta .s1-count{ color:var(--muted); font-size:11px; }
+  .s1-edit .s1-edit-actions{ display:flex; gap:6px; margin-top:2px; }
+  .s1-edit .s1-edit-actions button{
+    font-family:inherit; font-size:12.5px; padding:4px 12px; border-radius:6px;
+    border:1px solid var(--line2); background:#fff; cursor:pointer;
+  }
+  .s1-edit .s1-edit-actions button.save{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .s1-edit .s1-edit-actions button.cancel:hover{ background:#f3f1ec; }
+
+  /* M3 · 题库工具行 + 添加题目面板 */
+  .s1-bank-tools{
+    display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;
+    padding-top:14px; border-top:1px dashed #e4e1d8;
+  }
+  .s1-bank-tools .btn-line{
+    font:inherit; font-size:13px; padding:6px 12px; cursor:pointer;
+    border:1px solid var(--line2); background:#fff; border-radius:6px;
+    color:var(--text); transition:.12s;
+  }
+  .s1-bank-tools .btn-line:hover{ background:#f3f1ec; border-color:#b6b3ac; }
+  .s1-bank-tools .btn-line.danger{ color:#a02b2b; border-color:#e8c7c7; }
+  .s1-bank-tools .btn-line.danger:hover{ background:#fbe4e4; }
+  .s1-bank-tools .btn-line.primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .s1-bank-tools .btn-line.primary:hover{ background:#1d605a; border-color:#1d605a; }
+  .s1-bank-tools .s1-bank-msg{ font-size:12px; color:var(--muted); align-self:center; margin-left:auto; }
+
+  .s1-addpanel{ margin-top:14px; padding:14px 16px; background:#fbf8ee; border-radius:10px; border:1px solid #ecdfaf; }
+  .s1-addpanel h3{ margin:0 0 8px; font-size:13.5px; color:#5b6128; }
+  .s1-addpanel h3 small{ color:var(--muted); font-weight:400; margin-left:6px; }
+  .s1-addpanel .s1-add-form{ display:flex; flex-direction:column; gap:8px; }
+  .s1-addpanel input, .s1-addpanel textarea{
+    font-family:inherit; font-size:13.5px; padding:6px 10px; border:1px solid #d8d2bf;
+    border-radius:6px; background:#fff; color:var(--text); resize:vertical;
+  }
+  .s1-addpanel input:focus, .s1-addpanel textarea:focus{ outline:2px solid #d2c164; border-color:#ad9654; }
+  .s1-addpanel .s1-add-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .s1-addpanel .s1-add-row select{
+    font-family:inherit; font-size:13px; padding:5px 8px; border-radius:5px; border:1px solid #d8d2bf;
+  }
+  .s1-addpanel .s1-add-row .s1-add-count{ font-size:11.5px; color:var(--muted); margin-left:auto; }
+  .s1-addpanel .s1-add-msg{ font-size:12.5px; color:#a02b2b; min-height:18px; }
+  .s1-addpanel .s1-add-ok{ font-size:12.5px; color:#1d605a; }
+  .s1-addpanel .s1-add-actions{ display:flex; gap:8px; margin-top:2px; }
+  .s1-addpanel .s1-add-actions button{
+    font-family:inherit; font-size:13px; padding:6px 14px; border-radius:6px; border:1px solid var(--line2); cursor:pointer;
+  }
+  .s1-addpanel .s1-add-actions button.save{ background:#ad9654; color:#fff; border-color:#ad9654; }
+  .s1-addpanel .s1-add-actions button.save:hover{ background:#8c783f; }
+  .s1-addpanel .s1-add-actions button.cancel:hover{ background:#f3f1ec; }
+
+  /* 三档按钮：每档默认即有浅色填充和彩色文字（一眼即识别为按钮），
+     选中后变实色填充+白字+阴影 */
+  .s1-opts{ display:flex; gap:6px; flex-shrink:0; }
+  .s1-opt{ padding:5px 11px; font-size:12.5px; cursor:pointer; transition:.12s;
+    font-family:inherit; white-space:nowrap; border-radius:8px;
+    border:1px solid transparent; line-height:1.4; }
+  .s1-opt:focus-visible{ outline:2px solid var(--line2); outline-offset:1px; }
+  /* k3 非常重要 - 红 */
+  .s1-opt.k3{ color:#a02b2b; background:#fbe4e4; border-color:#f1c0c0; }
+  .s1-opt.k3:hover{ background:#f4cccc; border-color:#e8a4a4; }
+  .s1-opt.k3.on{ background:#c93a3a; border-color:#a02b2b; color:#fff; font-weight:600;
+    box-shadow:0 1px 2px rgba(140,40,40,.35); }
+  /* k2 一般重要 - 黄/棕 */
+  .s1-opt.k2{ color:#8e6318; background:#fdf2d4; border-color:#ecd9a2; }
+  .s1-opt.k2:hover{ background:#f7e2a5; border-color:#dec275; }
+  .s1-opt.k2.on{ background:#cf9a1e; border-color:#a5711b; color:#fff; font-weight:600;
+    box-shadow:0 1px 2px rgba(140,90,15,.35); }
+  /* k1 完全不重要 - 灰蓝 */
+  .s1-opt.k1{ color:#5a6170; background:#e8eaef; border-color:#cfd3dc; }
+  .s1-opt.k1:hover{ background:#d1d6df; border-color:#b1b7c4; }
+  .s1-opt.k1.on{ background:#6e7682; border-color:#4d5562; color:#fff; font-weight:600;
+    box-shadow:0 1px 2px rgba(0,0,0,.18); }
+
+  .s1-empty{ text-align:center; color:var(--muted); font-size:13.5px; padding:36px 0; display:none; }
+  .s1-empty.show{ display:block; }
+
+  .s1-legend{ margin-top:18px; font-size:12.5px; color:var(--muted); display:flex; gap:14px; flex-wrap:wrap; }
+  .s1-legend i{ display:inline-block; width:9px; height:9px; border-radius:99px; margin-right:5px; vertical-align:1px; }
+  .s1-legend .l3{ background:var(--c3); } .s1-legend .l2{ background:var(--c2); } .s1-legend .l1{ background:var(--c1); } .s1-legend .l0{ background:#c9c6bf; }
+
+  /* M4 衔接：键盘提示 · 高显眼度，靠近工具栏；kbd 标记贴在按钮内 */
+  .s1-keyhint{
+    display:flex; align-items:center; gap:8px; margin-top:10px;
+    font-size:12px; color:#5a4a14; background:#fbf1dd; border:1px solid #eeddba;
+    border-radius:8px; padding:7px 11px;
+  }
+  .s1-keyhint i{ font-style:normal; color:var(--text); }
+  .s1-keyhint kbd{ display:inline-block; min-width:18px; padding:1px 5px; margin:0 1px;
+    font:11.5px ui-monospace,Monaco,Consolas,monospace; text-align:center;
+    color:#3a3020; background:#fff; border:1px solid #d8c79a; border-bottom-width:2px;
+    border-radius:4px; }
+  .s1-keyhint .pipe{ color:#c9b877; margin:0 4px; }
+
+  /* 首次进入 onboarding 气泡：固定在 keyboard hint 旁边右下，5 秒后淡出 */
+  .s1-onboard{
+    position:relative; margin-top:10px;
+    background:#fffbe6; border:1px solid #e0d27a; border-left:3px solid var(--c3);
+    border-radius:8px; padding:11px 36px 11px 14px; font-size:12.5px; color:var(--text);
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+    animation:s1OnboardIn .35s ease-out;
+  }
+  .s1-onboard-title{ font-weight:600; color:#7a4b00; margin-bottom:4px; }
+  .s1-onboard-body{ line-height:1.65; }
+  .s1-onboard kbd{
+    display:inline-block; min-width:16px; padding:0 4px; margin:0 1px;
+    font:bold 11px ui-monospace,monospace; text-align:center;
+    color:#3a3020; background:#fff; border:1px solid #c9b97a; border-bottom-width:2px;
+    border-radius:3px;
+  }
+  .s1-onboard-x{
+    position:absolute; top:4px; right:6px;
+    width:24px; height:24px; padding:0; line-height:22px;
+    background:transparent; border:0; cursor:pointer; color:var(--muted); font-size:16px;
+  }
+  .s1-onboard-x:hover{ color:var(--text); }
+  .s1-onboard.fade{ opacity:0; transition:opacity .4s; pointer-events:none; }
+  /* ========== 浮动回到顶部按钮 ========== */
+  .back-to-top{
+    position:fixed; right:20px; bottom:24px; z-index:90;
+    width:44px; height:44px; padding:0;
+    background:var(--accent); color:#fff; border:0; border-radius:99px;
+    font-size:20px; line-height:42px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.18);
+    transition:transform .15s, opacity .2s;
+  }
+  .back-to-top:hover{ transform:translateY(-2px); background:var(--accent-deep,#2f6e6b); }
+  .back-to-top[hidden]{ display:none; }
+
+  @keyframes s1OnboardIn{ from{ opacity:0; transform:translateY(-6px);} to{opacity:1; transform:none;} }
+
+  /* ============================================================
+     M5 · 步骤③ · 结果与导出
+     ============================================================ */
+  /* 第二步底部"下一步"按钮 */
+  .s2-next{ display:flex; justify-content:flex-end; margin-top:14px; }
+  .s2-next .btn{ padding:8px 18px; font-size:13.5px; }
+
+  /* 摘要：5 指标 */
+  .s3-summary{ display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-top:10px; }
+  .s3-summary > div{
+    background:#fbf8ee; border:1px solid #ecdfaf; border-radius:8px;
+    padding:10px 12px; display:flex; flex-direction:column; gap:2px;
+  }
+  .s3-summary small{ font-size:11.5px; color:var(--muted); }
+  .s3-summary b{ font-size:18px; color:var(--text); font-variant-numeric:tabular-nums; }
+  .s3-summary b.warn{ color:var(--c-gap-bad); }
+  .s3-summary b.ok{ color:var(--c-gap-good); }
+  .s3-summary b.muted{ color:var(--muted); }
+
+  /* 分组概览卡 */
+  .s3-group-row{
+    display:grid; grid-template-columns:90px 1fr 56px; gap:10px;
+    align-items:center; font-size:13px; padding:7px 0;
+    border-bottom:1px solid #efebde;
+  }
+  .s3-group-row:last-child{ border-bottom:0; }
+  .s3-group-row .g-name{ font-weight:600; color:var(--text); }
+  .s3-group-row .g-bar{ position:relative; background:#f4f1e6; height:14px; border-radius:99px; overflow:hidden; }
+  .s3-group-row .g-seg{ position:absolute; top:0; height:100%; }
+  .s3-group-row .g-seg.d3{ background:var(--c3); }
+  .s3-group-row .g-seg.d2{ background:var(--c2); }
+  .s3-group-row .g-seg.d1{ background:var(--c1); }
+  .s3-group-row .g-legend{ font:11.5px ui-monospace,monospace; color:var(--muted); text-align:right; }
+  .s3-group-row .g-legend b{ color:var(--text); font-weight:600; }
+
+  /* 核心价值表（按差距排序） */
+  .s3-core-empty{ padding:32px 16px; text-align:center; color:var(--muted); font-size:13.5px; line-height:1.85; }
+  .s3-core-table{ width:100%; border-collapse:collapse; margin-top:8px; }
+  .s3-core-table thead th{
+    font-size:12px; font-weight:600; color:var(--muted); text-align:left;
+    padding:8px; border-bottom:1px solid var(--line); background:#faf8f0;
+  }
+  .s3-core-table tbody tr{ border-bottom:1px solid #efebde; }
+  .s3-core-table tbody tr.is-orphan{ background:#fff7f3; }
+  .s3-core-table td{ padding:8px; font-size:13px; vertical-align:middle; }
+  .s3-core-table .idx{ color:var(--muted); font:11.5px ui-monospace,monospace; width:32px; text-align:right; }
+  .s3-core-table .name .nm{ font-weight:600; }
+  .s3-core-table .name .dc{ color:var(--muted); font-size:11.5px; display:block; margin-top:2px; }
+  .s3-core-table .num{ font:600 13px ui-monospace,monospace; text-align:center; }
+  .s3-core-table .gap-cell{ width:78px; text-align:center; }
+  .s3-core-table .gap-cell .gp{ font-size:12.5px; padding:2px 8px; border-radius:99px; display:inline-block; min-width:28px; }
+  .s3-core-table .gap-cell .gp.bad{ background:#fbe4e4; color:#a02b2b; border:1px solid #f1c0c0; }
+  .s3-core-table .gap-cell .gp.bad-huge{ background:#c93a3a; color:#fff; }
+  .s3-core-table .gap-cell .gp.warn{ background:#fdf2d4; color:#8e6318; border:1px solid #ecd9a2; }
+  .s3-core-table .gap-cell .gp.ok{ background:#e7f3e7; color:#2d6e2d; border:1px solid #b6dcb6; }
+  .s3-core-table .gap-cell .gp.zero{ background:#eee; color:#888; }
+  .s3-core-table .s3-group-cell{ font:11.5px ui-monospace,monospace; color:var(--muted); width:80px; }
+
+  /* 全部勾选清单（按档位分组） */
+  .s3-all-sec{ margin-top:16px; }
+  .s3-all-sec:first-child{ margin-top:8px; }
+  .s3-all-head{
+    display:flex; align-items:baseline; gap:8px; padding:8px 0;
+    border-bottom:2px solid var(--line2);
+  }
+  .s3-all-head h3{ margin:0; font-size:14px; font-weight:700; letter-spacing:.4px; }
+  .s3-all-head .prog{ font-size:12px; color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums; }
+  .s3-all-head.d3 h3{ color:var(--c3); }
+  .s3-all-head.d2 h3{ color:var(--c2); }
+  .s3-all-head.d1 h3{ color:var(--c1); }
+  .s3-all-row{
+    display:grid; grid-template-columns:34px 1fr; gap:8px 12px;
+    padding:7px 10px; border-bottom:1px solid #efebde; font-size:13px;
+  }
+  .s3-all-row .id-num{ color:var(--muted); font:11.5px ui-monospace,monospace; text-align:right; padding-top:1px; }
+  .s3-all-row .nm{ font-weight:600; }
+  .s3-all-row .nm .gr{ font:11px ui-monospace,monospace; color:var(--muted); margin-left:4px; font-weight:400; }
+  .s3-all-row .dc{ color:var(--muted); font-size:11.5px; margin-top:2px; display:block; }
+  .s3-all-empty{ padding:18px; color:var(--muted); font-size:13px; text-align:center; }
+
+  /* 行动建议 */
+  .s3-action-item{
+    display:flex; gap:12px; align-items:flex-start; padding:10px 0;
+    border-bottom:1px solid #efebde;
+  }
+  .s3-action-item:last-child{ border-bottom:0; }
+  .s3-action-item .ai-rank{
+    flex-shrink:0; width:34px; height:34px; border-radius:99px;
+    background:var(--c3); color:#fff; font-weight:700;
+    display:flex; align-items:center; justify-content:center; font-size:14px;
+  }
+  .s3-action-item .ai-rank.r2{ background:var(--c2); }
+  .s3-action-item .ai-rank.r3{ background:var(--c1); }
+  .s3-action-item .ai-body{ flex:1; min-width:0; }
+  .s3-action-item .ai-title{ font-weight:700; font-size:14px; margin-bottom:4px; }
+  .s3-action-item .ai-title .gp{
+    font:12px ui-monospace,monospace; padding:1px 7px; border-radius:99px;
+    background:#fbe4e4; color:#a02b2b; border:1px solid #f1c0c0; margin-left:6px;
+  }
+  .s3-action-item .ai-desc{ color:#4b5159; font-size:13px; line-height:1.7; }
+  .s3-action-item .ai-hint{ color:var(--muted); font-size:11.5px; margin-top:4px; }
+
+  /* 导出按钮区 */
+  .s3-export-tools{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+  .s3-export-tools .btn{ font-size:13px; padding:8px 14px; }
+  .s3-export-msg{ font-size:12.5px; color:var(--muted); margin-top:8px; min-height:18px; }
+  .s3-export-msg.ok{ color:var(--ok); }
+  .s3-export-msg.bad{ color:var(--c3); }
+
+  /* 结果页底部导航 */
+  .s3-nav{ display:flex; gap:8px; justify-content:space-between; margin-top:18px; }
+
+  /* print：步骤③ 隐藏导出区、按钮、回到顶部，保留内容本体 */
+  @media print{
+    .s3-export-card, .s3-nav, #backToTop, .debugrp{ display:none !important; }
+    .s3-core-table th, .s3-core-table td{ border-color:#ccc; }
+    .s3-core-table thead th{ background:#f0f0f0 !important; }
+    .s3-action-item .ai-rank{ background:#ddd !important; color:#000 !important; }
+  }
+
+  /* 手机端：摘要 5 列 → 2 列；导出按钮全宽；分组概览/全部清单优化 */
+  @media (max-width:700px){
+    .s3-summary{ grid-template-columns:1fr 1fr; gap:8px; }
+    .s3-summary b{ font-size:16px; }
+    .s3-export-tools{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .s3-export-tools .btn{ padding:8px 6px; font-size:12.5px; }
+    .s3-nav{ flex-direction:column-reverse; gap:6px; }
+    .s3-nav .btn{ width:100%; padding:8px; }
+    .s3-group-row{ grid-template-columns:70px 1fr 50px; font-size:12.5px; }
+    .s3-all-row{ grid-template-columns:24px 1fr; padding:8px; }
+    /* 核心价值表转卡片 */
+    .s3-core-table thead{ display:none; }
+    .s3-core-table{ display:block; }
+    .s3-core-table tbody{ display:flex; flex-direction:column; gap:8px; }
+    .s3-core-table tr{ display:block; border:1px solid var(--line2); border-radius:8px; padding:10px; }
+    .s3-core-table td{ display:block; padding:4px 0; border:0; }
+    .s3-core-table td.idx{ display:none; }
+    .s3-core-table td.num{ display:inline-block; width:auto; padding:2px 8px; margin-right:4px; font-size:12px; }
+    .s3-core-table td.gap-cell{ display:flex; align-items:center; gap:8px; margin-top:6px; padding-top:6px; border-top:1px dashed #efebde; }
+    .s3-core-table td.gap-cell::before{ content:'差距'; font:11px ui-monospace,monospace; color:var(--muted); margin-right:auto; }
+  }
+
+  .s1-opt .kbd-hint{
+    /* 改为按钮右上角浮动角标，无论 .on 与否都保持可见 */
+    position:absolute; top:-8px; right:-8px;
+    min-width:20px; width:20px; height:20px; padding:0;
+    font:bold 12px ui-monospace,Monaco,Consolas,monospace; text-align:center; line-height:20px;
+    color:#3a3020; background:#fff; border:1.5px solid #c9bfa1; border-bottom-width:2px;
+    border-radius:99px; box-shadow:0 1px 2px rgba(0,0,0,.06);
+    box-sizing:border-box;
+  }
+  .s1-opt.k3 .kbd-hint{ border-color:#c93a3a; color:#c93a3a; }
+  .s1-opt.k2 .kbd-hint{ border-color:#cf9a1e; color:#cf9a1e; }
+  .s1-opt.k1 .kbd-hint{ border-color:#6e7682; color:#6e7682; }
+  .s1-opt.on .kbd-hint{ background:#fff; color:#3a3020; border-color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.18); }
+  body.dense .s1-opt .kbd-hint{ display:none; }
+  /* opt 本身加 position:relative 让 absolute kbd 有锚点 */
+  .s1-opt{ position:relative; }
+
+  /* 进入时第一行自动 focus，键盘就能直接用 */
+  #s1List .s1-row:focus{ outline:none; box-shadow:inset 0 0 0 2px var(--accent-soft); background:#f5f9f8; }
+  #s1List .s1-row.is-focused{ background:#f5f9f8; box-shadow:inset 0 0 0 2px var(--accent); }
+
+  @media (max-width:700px){
+    /* row：序号 + 内容两列，按钮换行到第二行占满 */
+    .s1-row{ grid-template-columns:26px 1fr; gap:8px 10px; padding:10px; }
+    .s1-opts{ grid-column:1 / -1; justify-content:flex-end; flex-wrap:wrap; gap:5px; }
+    .s1-opt{ padding:6px 10px; font-size:12.5px; }
+    .s1-idx{ font-size:11px; }
+    .s1-sec-head{ position:static; border-bottom:1px solid var(--line); margin-top:6px; padding:6px 10px; }
+    .s1-sec{ margin-top:18px; }
+    /* 顶部工具栏 / 搜索栏 / 开关换行 */
+    .s1-tools{ flex-direction:column; align-items:stretch; gap:8px; }
+    .s1-search{ width:100%; }
+    .s1-tools .switch{ font-size:13px; }
+    /* bank 工具栏按钮：双列网格 */
+    .s1-bank-tools{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .s1-bank-tools .btn-line{ padding:8px 6px; font-size:12.5px; }
+    /* 添加题目面板：移动端全宽 */
+    .s1-addpanel-row{ flex-direction:column; }
+    .s1-addpanel-row .grow{ width:100%; }
+    .s1-addpanel-acts{ flex-direction:column-reverse; gap:6px; }
+    .s1-addpanel-acts button{ width:100%; }
+    /* keyboard hint 换行 */
+    .s1-keyhint{ flex-wrap:wrap; font-size:11.5px; }
+    /* onboarding 气泡 */
+    .s1-onboard{ font-size:12px; padding:10px 32px 10px 12px; }
+    /* M4 stats 4 列 → 2 列 */
+    .s2-stats{ grid-template-columns:1fr 1fr; gap:10px; }
+    /* M4 表格变成卡片化：tr → block；内部 td → grid item */
+    .s2-table{ display:block; }
+    .s2-table thead{ display:none; }
+    #s2Body{ display:flex; flex-direction:column; gap:8px; }
+    .s2-table tr{
+      display:grid; grid-template-columns:1fr; gap:6px; padding:10px;
+      border:1px solid var(--line2); border-radius:8px; background:#fff;
+      margin-bottom:0;
+    }
+    .s2-table td{ display:block; padding:0; border:0; }
+    .s2-table td.score-col,
+    .s2-table td.gap-col,
+    .s2-table td.op-col{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .s2-table td.score-col .sc-buttons{ margin-left:auto; }
+    .s2-table td.gap-col .gp{ font-size:13px; }
+    .s2-table td.op-col{ justify-content:flex-end; }
+    .s2-table tr.is-orphan{ border-left:3px solid var(--c3); padding-left:8px; }
+    /* M4 排行 → 卡片 */
+    .s2-rank-row{ flex-direction:column; align-items:flex-start; gap:4px; }
+    .s2-rank-bar-wrap{ width:100%; }
+    /* orphan 卡片 */
+    .s2-orphan-row{ flex-direction:column; align-items:flex-start; }
+    /* 同步按钮：移动端单独一行 */
+    .s2-syncbar{ flex-direction:column; align-items:stretch; gap:6px; }
+    .s2-syncbar .btn-primary{ width:100%; }
+    /* 步骤条：4 段拥挤时换行 */
+    .stepbar{ flex-wrap:wrap; }
+    /* 调试条：移到更小字体 */
+    .debugrp{ font-size:10.5px; }
+    /* 顶部回到顶部按钮 */
+    #backToTop{ right:12px; bottom:12px; width:40px; height:40px; font-size:18px; }
+    /* modal / 添加题目 */
+    .modal{ padding:12px; max-width:94vw; max-height:90vh; }
+  }
+  @media print{
+    .s1-tools, .s1-legend, .s1-sec-head{ display:none !important; }
+    .s1-row{ break-inside:avoid; margin-top:4px; padding:6px 8px; border-color:#ccc; }
+    .s1-row.hide{ display:none; }
+    .s1-opt{ border-color:#bbb; color:#999; }
+    .s1-opt.on{ color:#000 !important; font-weight:700; }
+    .s1-opt.k3.on{ background:#e6b3b3 !important; color:#000 !important; border-color:#c93a3a !important; }
+    .s1-opt.k2.on{ background:#f0dcb0 !important; color:#000 !important; border-color:#b0791a !important; }
+    .s1-opt.k1.on{ background:#d6d9de !important; color:#000 !important; border-color:#7b8290 !important; }
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+
+  @media print{
+    .steps, .banner, .no-print, .debugrp{ display:none !important; }
+    body{ background:#fff; }
+  }
+</style>
+</head>
+<body>
+
+<div class="steps" id="steps" role="tablist" aria-label="进度步骤">
+  <div class="step on" data-step="0" role="tab" tabindex="0"><div class="num">▶</div><div class="lab">开始</div><div class="chk">✓</div></div>
+  <div class="step" data-step="1" role="tab" tabindex="0"><div class="num">①</div><div class="lab">题库勾选</div><div class="chk">✓</div></div>
+  <div class="step" data-step="2" role="tab" tabindex="0"><div class="num">②</div><div class="lab">核心价值打分</div><div class="chk">✓</div></div>
+  <div class="step" data-step="3" role="tab" tabindex="0"><div class="num">③</div><div class="lab">结果与导出</div><div class="chk">✓</div></div>
+</div>
+
+<div class="banner" id="banner"></div>
+
+<div class="wrap">
+
+  <!-- ========== 步骤 0 · 开始 ========== -->
+  <div class="view on" id="view-0">
+    <div class="card">
+      <h2>价值观梳理工具<small>分两步，把对你真正重要的价值梳理出来</small></h2>
+      <p style="color:#4b5159;font-size:14.5px;line-height:1.85;margin:12px 0 6px">
+        <b>第一步</b>，在 <b>154 条</b> 价值词里挑出对你而言不同重要程度的条目；
+        <b>第二步</b>，把标为「非常重要」的条目拎出来，给「重要性」和「一致性」各打 0–5 分，看差距，找行动方向。
+      </p>
+      <p style="color:#4b5159;font-size:14px;line-height:1.85;margin:6px 0 6px">
+        所有数据<b>只存在你自己的浏览器</b>里，不上传任何服务器，不需要注册，关掉浏览器下次开还在。
+      </p>
+      <p style="color:var(--muted);font-size:12.5px;margin-top:14px">
+        建议留出 20–30 分钟。中间可以随时关掉，下次接着填。
+      </p>
+      <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" id="btnStart">开始 →</button>
+        <button class="btn" id="btnRestore" title="从「导出答案 JSON」恢复">导入答案</button>
+        <button class="btn ghost" id="btnResetAll" style="color:var(--c3)">清空全部进度</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="font-size:14px">当前题库概览</h2>
+      <div id="bankOverview" style="font-size:13px;color:#4b5159"></div>
+    </div>
+  </div>
+
+  <!-- ========== 步骤 1 · 第一步 ========== -->
+  <div class="view" id="view-1">
+    <div class="card s1-card">
+      <div class="bar"><i id="s1Bar"></i></div>
+      <div class="s1-stats">
+        <span><i class="dot d3"></i>非常重要 <b id="s1N3">0</b></span>
+        <span><i class="dot d2"></i>一般重要 <b id="s1N2">0</b></span>
+        <span><i class="dot d1"></i>完全不重要 <b id="s1N1">0</b></span>
+        <span><i class="dot d0"></i>未选 <b id="s1N0">0</b></span>
+        <span>合计 <b id="s1NT">0</b></span>
+      </div>
+      <div class="s1-tools">
+        <input type="search" id="s1Q" class="s1-search" placeholder="搜索价值词或释义，如「诚实」「家庭」">
+        <label class="switch"><input type="checkbox" id="s1OnlyUn">只看未选</label>
+        <label class="switch"><input type="checkbox" id="s1AutoNext" checked>选完自动跳下一条</label>
+        <label class="switch"><input type="checkbox" id="s1Dense">密集模式（隐藏释义）</label>
+      </div>
+
+      <!-- M3 · 题库管理第二行 -->
+      <div class="s1-bank-tools no-print">
+        <button class="btn-line primary" id="s1AddBtn" type="button">+ 添加题目</button>
+        <button class="btn-line" id="s1RestoreBankBtn" type="button">↻ 恢复默认题库</button>
+        <button class="btn-line" id="s1ExportBankBtn" type="button">↥ 导出题库 JSON</button>
+        <button class="btn-line" id="s1ImportBankBtn" type="button">↧ 导入题库 JSON</button>
+        <input type="file" id="s1ImportBankFile" accept=".json,application/json" style="display:none">
+        <span class="s1-bank-msg" id="s1BankMsg"></span>
+      </div>
+
+      <!-- 键盘提示：固定显眼位置，等同于 M4 之前的"做完了才发现" → 现在进页面就看到 -->
+      <div class="s1-keyhint" id="s1KeyHint" role="note" aria-label="键盘提示">
+        <i>⌨</i>
+        <i>选档：</i><kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd><span class="pipe">·</span>
+        <i>取消：</i><kbd>0</kbd><span class="pipe">·</span>
+        <i>上下：</i><kbd>↑</kbd><kbd>↓</kbd><span class="pipe">·</span>
+        <i>跳搜索：</i><kbd>/</kbd>
+      </div>
+
+      <!-- 首次进入 onboarding 气泡（5 秒自动消失，可点 ×） -->
+      <div class="s1-onboard" id="s1Onboard" hidden role="dialog" aria-label="键盘 onboarding">
+        <button type="button" class="s1-onboard-x" id="s1OnboardClose" aria-label="知道了">×</button>
+        <div class="s1-onboard-title">💡 试试用键盘，更快</div>
+        <div class="s1-onboard-body">
+          点中任意一条价值词后：<br>
+          · 按 <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd> 选档（按钮角标就是键盘键位）<br>
+          · 按 <kbd>0</kbd> 取消<br>
+          · <kbd>↑</kbd>/<kbd>↓</kbd> 上下移动，<kbd>/</kbd> 跳到搜索框<br>
+          <span style="color:var(--muted);font-size:11.5px">没有键盘？用鼠标直接点按钮也行，每个按钮右上角都有 <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd> 提示</span>
+        </div>
+      </div>
+
+      <!-- M3 · 添加题目面板（默认隐藏） -->
+      <div class="s1-addpanel no-print" id="s1AddPanel" hidden>
+        <h3>+ 添加自定义题目 <small>价值词 ≤12 字 · 释义 ≤60 字</small></h3>
+        <div class="s1-add-form">
+          <input type="text" id="s1AddName" placeholder="价值词，如「我的价值」（≤12字）" maxlength="12">
+          <textarea id="s1AddDesc" rows="2" placeholder="释义（≤60字），一句话说清楚它的意思" maxlength="60"></textarea>
+          <div class="s1-add-row">
+            <label>分组：
+              <select id="s1AddGroup"></select>
+            </label>
+            <span class="s1-add-count" id="s1AddCount"></span>
+            <div class="s1-add-actions" style="margin-left:auto">
+              <button type="button" class="save" id="s1AddSave">保存</button>
+              <button type="button" class="cancel" id="s1AddCancel">取消</button>
+            </div>
+          </div>
+          <div class="s1-add-msg" id="s1AddMsg"></div>
+          <div class="s1-add-ok" id="s1AddOk"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="s1List" class="s1-list"></div>
+    <div id="s1Empty" class="s1-empty">没有匹配的条目，换个关键词试试。</div>
+
+    <div class="s1-legend no-print">
+      <span><i class="l3"></i>非常重要</span>
+      <span><i class="l2"></i>一般重要</span>
+      <span><i class="l1"></i>完全不重要</span>
+      <span><i class="l0"></i>未选</span>
+    </div>
+  </div>
+
+  <!-- ========== 步骤 2 · 第二步（M4 · 核心价值打分） ========== -->
+  <div class="view" id="view-2">
+    <div class="card s2-card">
+      <div class="bar"><i id="s2Bar"></i></div>
+      <div class="s2-stats">
+        <div><small>已打分 / 总数</small><b id="s2Scored">0 / 0</b></div>
+        <div><small>平均重要性</small><b id="s2AvgI">-</b></div>
+        <div><small>平均一致性</small><b id="s2AvgC">-</b></div>
+        <div><small>最大差距</small><b id="s2MaxG">-</b></div>
+      </div>
+      <div class="s2-tools no-print">
+        <button class="btn primary" id="s2SyncBtn" type="button">把「非常重要」同步到第二步 (<b id="s2N3">0</b>)</button>
+        <label style="font-size:12.5px;color:var(--muted);margin-left:2px">排序
+          <select id="s2Sort">
+            <option value="gap">差距 ↓</option>
+            <option value="imp">重要性 ↓</option>
+            <option value="con">一致性 ↓</option>
+            <option value="name">按名字 A→Z</option>
+            <option value="order">按加入顺序</option>
+          </select>
+        </label>
+        <button class="btn" id="s2AddBtn" type="button">+ 从题库再加</button>
+        <span style="flex:1"></span>
+        <button class="btn ghost" id="s2ClearAll" type="button" style="color:var(--c3)">清空打分</button>
+      </div>
+    </div>
+
+    <div class="card s2-table-card">
+      <div class="s2-empty" id="s2Empty" hidden>
+        第二步目前没有条目。<br>
+        回第一步把一些价值标为「非常重要」，再回这里点上方按钮即可。
+      </div>
+      <table class="s2-table" id="s2Table">
+        <thead>
+          <tr>
+            <th class="idx">#</th>
+            <th>价值</th>
+            <th class="score-col">重要性 <span style="font-weight:400;font-size:11px;color:var(--muted)">(0-5)</span></th>
+            <th class="score-col">一致性 <span style="font-weight:400;font-size:11px;color:var(--muted)">(0-5)</span></th>
+            <th class="gap-col">差距</th>
+            <th class="op-col no-print"></th>
+          </tr>
+        </thead>
+        <tbody id="s2Body"></tbody>
+      </table>
+    </div>
+
+    <div class="card s2-rank-card">
+      <h2 style="font-size:14.5px;margin:0 0 12px">差距排行 <span style="font-weight:400;color:var(--muted);font-size:12.5px;margin-left:8px">差距 = 重要性 − 一致性，差距越大越需要行动</span></h2>
+      <div id="s2Rank"></div>
+    </div>
+
+    <div class="card s2-orphan-card no-print" id="s2Orphan" hidden>
+      <h2 style="font-size:14px;margin:0 0 4px;color:#a02b2b">在第一步已取消「非常重要」的条目</h2>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:6px">这些条目已在第二步名单里，但回到第一步时它们不再被标为「非常重要」。如要从第二步移出，按下方 × 。</div>
+      <ul id="s2OrphanList"></ul>
+    </div>
+
+    <!-- M5 · 第二步 → 结果页 -->
+    <div class="s2-next no-print" id="s2NextWrap">
+      <button class="btn primary" id="s2NextBtn" type="button">下一步：查看结果 →</button>
+    </div>
+  </div>
+
+  <!-- ========== 步骤 3 · 结果与导出 ========== -->
+  <div class="view" id="view-3">
+    <!-- 摘要：5 指标（总数 / 已打分 / 平均重要 / 平均一致 / 最大差距） -->
+    <div class="card s3-summary-card">
+      <div class="bar"><i id="s3Bar"></i></div>
+      <h2>① 全局摘要<small>基于你第一步、第二步的全部勾选与打分</small></h2>
+      <div class="s3-summary" id="s3Summary"></div>
+    </div>
+
+    <!-- 分组概览：每组的勾选分布 -->
+    <div class="card s3-groups-card">
+      <h2>② 各分组勾选分布<small>非常 / 一般 / 完全不重要</small></h2>
+      <div id="s3Groups"></div>
+    </div>
+
+    <!-- 核心价值列表（按差距降序）：含行动建议 -->
+    <div class="card s3-core-card">
+      <h2>③ 核心价值清单<small>差距 = 重要性 − 一致性，差距越大越需要行动</small></h2>
+      <div id="s3Core"></div>
+    </div>
+
+    <!-- 全部勾选条目清单（按档位分类） -->
+    <div class="card s3-all-card">
+      <h2>④ 全部勾选清单<small>含「非常重要」「一般重要」「完全不重要」三档</small></h2>
+      <div id="s3All"></div>
+    </div>
+
+    <!-- 行动建议：基于差距最大的条目 -->
+    <div class="card s3-action-card" id="s3ActionCard" hidden>
+      <h2>⑤ 行动建议<small>差距排名前 3 的核心价值</small></h2>
+      <div id="s3Action"></div>
+    </div>
+
+    <!-- 导出操作区 -->
+    <div class="card s3-export-card no-print">
+      <h2>⑥ 导出 / 复制 / 打印</h2>
+      <div class="s3-export-tools">
+        <button class="btn primary" id="s3ExportMd" type="button">↥ 导出 Markdown</button>
+        <button class="btn primary" id="s3ExportTxt" type="button">↥ 导出纯文本</button>
+        <button class="btn primary" id="s3ExportJson" type="button">↥ 导出答案 JSON</button>
+        <button class="btn" id="s3CopyMd" type="button">📋 复制 Markdown</button>
+        <button class="btn" id="s3Print" type="button">🖨 打印</button>
+        <button class="btn ghost" id="s3ImportBtn" type="button" style="color:var(--accent)">↧ 导入答案</button>
+      </div>
+      <div class="s3-export-msg" id="s3ExportMsg"></div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="s3-nav no-print">
+      <button class="btn" id="s3Back2" type="button">← 回到打分</button>
+      <button class="btn ghost" id="s3Back0" type="button">回到开始页</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- 调试条：M1 提供 vtTest() 用于回归测试，M2 起保留作为辅助 -->
+<div class="debugrp no-print" id="debugrp" style="display:none">
+  <div>step=<b id="dbStep">-</b> · shortlist=<b id="dbShort">0</b> · answers=<b id="dbAns">0</b></div>
+  <div>localStorage=<span id="dbStore">-</span> · <a href="#" id="dbRun" style="color:var(--accent);text-decoration:underline">运行切换回归</a></div>
+  <div id="dbResults"></div>
+</div>
+
+<!-- 浮动回到顶部按钮：滚动 > 200px 显示，隐藏按钮和导航打印时不出现 -->
+<button type="button" class="back-to-top no-print" id="backToTop" aria-label="回到顶部" hidden>↑</button>
+
+<!-- 导入答案用的隐藏 file input（放 body 末尾，所有视图都可用） -->
+<input type="file" id="s3ImportFile" accept=".json,application/json" style="display:none">
+
+<script>
+/* ===========================================================
+   内联题库（由 build.mjs 注入；断网完全可用）
+   =========================================================== */
+const BANK_ITEMS = [/*__BANK_ITEMS__*/];
+const BANK_GROUPS = __BANK_GROUPS__;
+const BANK_VERSION = __BANK_VERSION__;
+const BANK_NAME = __BANK_NAME__;
+const BANK_GENERATED = __BANK_GENERATED__;
+
+/* ===========================================================
+   单一 state + localStorage（硬性约束 #3）
+   =========================================================== */
+const KEY = 'values-tool-v1';
+const SCHEMA = 1;
+
+let state = {
+  schemaVersion: SCHEMA,
+  step: 0,                          // 0 开始 / 1 第一步 / 2 第二步 / 3 结果
+  bank: {                           // 内联，但留一份对照，便于以后接「导入题库」
+    items: BANK_ITEMS,
+    groups: BANK_GROUPS,
+    version: BANK_VERSION,
+    name: BANK_NAME,
+    generatedAt: BANK_GENERATED,
+    custom: []                      // 自建题（M3 用）
+  },
+  answers: {},   // { id: { mark:3|2|1|0, importance:0..5|null, consistency:0..5|null } }
+  shortlist: [], // [id, ...] 顺序敏感：第二步的实际名单
+  ui: {          // 各步骤的视图状态（M2 起填，不在切步骤时清空）
+    step1: { q:'', onlyUn:false, autoNext:true, dense:false },
+    step2: { sort:'order' }
+  },
+  // M3 · 自建题库（与硬编码 BANK_ITEMS 合并显示；id 前缀 c，避免与 v 编号冲突）
+  bankCustom: [],         // [{id:'c001', group:'A—C', name, desc}, ...]
+  nextCustomId: 1,        // 自建题序号（= bankCustom.length + 1，保存时回填防止空洞）
+  updatedAt: null
+};
+
+let storeOK = true;
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    if(!s || s.schemaVersion !== SCHEMA) return;
+    // 注意：state.bank.items 不从 localStorage 恢复，避免被外部篡改后失去内联题库
+    state.step = (typeof s.step === 'number') ? s.step : 0;
+    state.answers = (s.answers && typeof s.answers === 'object') ? s.answers : {};
+    state.shortlist = Array.isArray(s.shortlist) ? s.shortlist : [];
+    state.ui = (s.ui && typeof s.ui === 'object') ? s.ui : state.ui;
+    // 兼容旧字段 / 默认值填补
+    if(!state.ui.step1 || typeof state.ui.step1 !== 'object') state.ui.step1 = {q:'',onlyUn:false,autoNext:true,dense:false,keyhintShown:false};
+    if(typeof state.ui.step1.keyhintShown !== 'boolean') state.ui.step1.keyhintShown = false;
+    if(!state.ui.step2 || typeof state.ui.step2 !== 'object') state.ui.step2 = {sort:'order'};
+    // 旧版本可能存的 'gap' 实际是上一版的默认值，不是用户主动选的 → 迁移到 'order'（新默认）
+    if(!state.ui.step2.sort || state.ui.step2.sort === 'gap') state.ui.step2.sort = 'order';
+    state.bankCustom = Array.isArray(s.bankCustom) ? s.bankCustom : [];
+    state.nextCustomId = (typeof s.nextCustomId === 'number' && s.nextCustomId > 0) ? s.nextCustomId : (state.bankCustom.length + 1);
+  }catch(e){}
+  // 探测 localStorage 写入权限
+  try{
+    localStorage.setItem(KEY + ':t', '1');
+    localStorage.removeItem(KEY + ':t');
+  }catch(e){ storeOK = false; }
+}
+
+function save(){
+  if(!storeOK) return;
+  state.updatedAt = new Date().toISOString();
+  try{
+    localStorage.setItem(KEY, JSON.stringify({
+      schemaVersion: SCHEMA,
+      step: state.step,
+      answers: state.answers,
+      shortlist: state.shortlist,
+      ui: state.ui,
+      bankCustom: state.bankCustom,
+      nextCustomId: state.nextCustomId,
+      updatedAt: state.updatedAt
+    }));
+  }catch(e){
+    storeOK = false;
+    document.getElementById('banner').classList.add('show');
+    document.getElementById('banner').textContent = '当前浏览器不允许自动保存进度：请保持本页面开启，填完务必「导出答案 JSON」。';
+  }
+}
+
+/* ===========================================================
+   步骤切换（硬性约束 #5：只换视图，不重置任何数据）
+   =========================================================== */
+const NAMES = ['开始','题库勾选','核心价值打分','结果与导出'];
+
+function go(step){
+  if(step < 0 || step > 3) return;
+  state.step = step;
+  // 切视图
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  const target = document.getElementById('view-' + step);
+  if(target) target.classList.add('on');
+  // 更新步骤条样式：当前 on，历史 done，未来默认
+  document.querySelectorAll('.step').forEach(s => {
+    const stp = Number(s.dataset.step);
+    s.classList.toggle('on', stp === step);
+    s.classList.toggle('done', stp < step);
+  });
+  // 步骤进入钩子：仅恢复 UI 控件值 / 刷新统计，不重建 DOM
+  if(step === 1) enterStep1();
+  if(step === 2 && typeof updateForStep2 === 'function') updateForStep2();
+  if(step === 3 && typeof updateForStep3 === 'function') updateForStep3();
+  save();
+  debugTick();
+}
+
+/* ===========================================================
+   开始页交互
+   =========================================================== */
+function renderBankOverview(){
+  const total = state.bank.items.length + (state.bankCustom || []).length;
+  const groups = state.bank.groups.map(g => {
+    const n = state.bank.items.filter(it => it.group === g).length
+            + (state.bankCustom || []).filter(c => c.group === g).length;
+    return `<span>${g} · <b>${n}</b> 项</span>`;
+  }).join(' · ');
+  const custom = (state.bankCustom || []).length;
+  const el = document.getElementById('bankOverview');
+  if(el) el.innerHTML =
+    `共 <b>${total}</b> 条价值词（默认 ${state.bank.items.length} 条${custom?` · 自建 ${custom} 条`:''}）· ${groups}<br>` +
+    `<span style="color:var(--muted);font-size:12.5px">题库版本 ${state.bank.version} · 生成于 ${state.bank.generatedAt}</span>`;
+}
+
+/* 清空全部进度（带二次确认） */
+function resetAll(){
+  if(!confirm('清空全部勾选、打分与第二步名单，重新开始？此操作不可撤销。')) return;
+  state.answers = {}; state.shortlist = []; state.step = 0;
+  state.ui = { step1:{q:'',onlyUn:false,autoNext:true,dense:false,keyhintShown:false}, step2:{sort:'order'} };
+  save(); go(0); renderBankOverview();
+}
+
+/* 导入答案 JSON 在 M5 完整实现（见下方 s3ImportBtn 绑定）。开始页的"导入答案"按钮也共用同一逻辑。 */
+
+/* ===========================================================
+   M2 · 第一步 · 题库渲染 + 三档勾选 + 搜索 + 筛选 + 密集模式
+   =========================================================== */
+function _escId(s){ return String(s).replace(/—/g,'_').replace(/[ :]/g,'_'); }
+const _ROW_HIDE = 'hide';
+
+function _allBankItems(){
+  // M3 起合并 BANK_ITEMS（硬编码默认题） + state.bankCustom（用户自建题）
+  // 返回"默认 + 自建"的扁平数组，自建题排在各分组末尾（按 group 顺序）
+  const groups = state.bank.groups;
+  const customs = state.bankCustom || [];
+  const out = [];
+  groups.forEach(g => {
+    out.push(...state.bank.items.filter(it => it.group === g).map(it => ({...it, custom: false})));
+    const cs = customs.filter(c => c.group === g);
+    if(cs.length){ out.push(...cs.map(c => ({...c, custom: true}))); }
+  });
+  return out;
+}
+
+function renderStep1(){
+  // 一次构建；切换步骤用 display:none 不卸载 DOM，所以滚动位置和未保存筛选都保留
+  if(document.getElementById('s1List').dataset.rendered === '1') return;
+  const wrap = document.getElementById('s1List');
+  wrap.innerHTML = '';
+  const items = _allBankItems();
+  let curSec = null, secEl = null;
+  let n = 0;
+  items.forEach(it => {
+    n++;
+    if(it.group !== curSec){
+      curSec = it.group;
+      secEl = document.createElement('section');
+      secEl.className = 's1-sec';
+      secEl.dataset.group = it.group;
+      const head = document.createElement('div');
+      head.className = 's1-sec-head';
+      head.innerHTML = '<h3>' + esc(it.group) + '</h3><span class="prog" id="s1G_' + _escId(it.group) + '">0 / 0</span>';
+      secEl.appendChild(head);
+      wrap.appendChild(secEl);
+    }
+    const row = document.createElement('div');
+    row.className = 's1-row' + (it.custom ? ' is-custom' : '');
+    row.dataset.id = it.id;
+    row.dataset.sec = it.group;
+    row.dataset.search = ((it.name || '') + ' ' + (it.desc || '')).toLowerCase();
+    row.tabIndex = 0;
+    row.setAttribute('role', 'group');
+
+    const tags = (it.custom ? '<span class="s1-tag">自建</span>' : '');
+    row.innerHTML =
+      '<div class="s1-idx">' + n + '.</div>' +
+      '<div class="s1-info">' +
+        '<div class="s1-name">' + esc(it.name) + (tags ? ' ' + tags : '') + '</div>' +
+        (it.desc ? '<div class="s1-def">' + esc(it.desc) + '</div>' : '') +
+      '</div>' +
+      '<div class="s1-opts">' +
+        '<button type="button" class="s1-opt k3" data-v="3">非常重要<span class="kbd-hint">1</span></button>' +
+        '<button type="button" class="s1-opt k2" data-v="2">一般重要<span class="kbd-hint">2</span></button>' +
+        '<button type="button" class="s1-opt k1" data-v="1">完全不重要<span class="kbd-hint">3</span></button>' +
+      '</div>' +
+      '<div class="s1-actions no-print">' +
+        '<button type="button" class="s1-act edit" title="编辑" aria-label="编辑">✎</button>' +
+        '<button type="button" class="s1-act del"  title="删除" aria-label="删除">×</button>' +
+      '</div>';
+
+    const mark = state.answers[it.id] && state.answers[it.id].mark;
+    if(mark && mark >= 1){
+      row.dataset.v = String(mark);
+      const btns = row.querySelectorAll('.s1-opt');
+      btns.forEach(b => b.classList.toggle('on', Number(b.dataset.v) === mark));
+    }
+    secEl.appendChild(row);
+  });
+  wrap.dataset.rendered = '1';
+}
+
+function updateStatsS1(){
+  const items = _allBankItems();
+  let n3=0,n2=0,n1=0;
+  items.forEach(it => {
+    const m = state.answers[it.id] && state.answers[it.id].mark;
+    if(m===3) n3++; else if(m===2) n2++; else if(m===1) n1++;
+  });
+  document.getElementById('s1N3').textContent = n3;
+  document.getElementById('s1N2').textContent = n2;
+  document.getElementById('s1N1').textContent = n1;
+  document.getElementById('s1N0').textContent = items.length - n3 - n2 - n1;
+  document.getElementById('s1NT').textContent = items.length;
+  const done = n3 + n2 + n1;
+  document.getElementById('s1Bar').style.width = (done / items.length * 100).toFixed(1) + '%';
+
+  state.bank.groups.forEach(g => {
+    const secItems = items.filter(it => it.group === g);
+    const secDone = secItems.filter(it => {
+      const m = state.answers[it.id] && state.answers[it.id].mark;
+      return m && m >= 1;
+    }).length;
+    const el = document.getElementById('s1G_' + _escId(g));
+    if(el) el.textContent = secDone + ' / ' + secItems.length;
+  });
+}
+
+/* ===========================================================
+   M4 · 第二步 · 核心价值打分 · 差距 · 排行 · 衔接
+   =========================================================== */
+
+function _esc(s){ return esc(s == null ? '' : s).replace(/'/g, '&#39;').replace(/"/g, '&quot;'); }
+
+function _itemById(id){
+  return _allBankItems().find(it => it.id === id);
+}
+
+function _isMark3(id){
+  const a = state.answers[id];
+  return !!(a && a.mark === 3);
+}
+
+function _gapOf(id){
+  const a = state.answers[id] || {};
+  if(a.importance == null || a.consistency == null) return null;
+  return a.importance - a.consistency;
+}
+
+// 排序 + 表渲染 + 排名 + 顶部统计 + 孤儿卡片
+function updateForStep2(){
+  // 同步排序控件与 state.ui.step2.sort（HTML 默认是 gap，必须按用户/默认值显式设）
+  const sortEl = document.getElementById('s2Sort');
+  if(sortEl && state.ui.step2.sort && sortEl.value !== state.ui.step2.sort){
+    sortEl.value = state.ui.step2.sort;
+  }
+  _renderS2Stats();
+  _renderS2Table();
+  _renderS2Rank();
+  _renderS2Orphan();
+}
+
+// 顶部统计 + 同步按钮上的 N
+function _renderS2Stats(){
+  const sl = state.shortlist || [];
+  const totalInS2 = sl.length;
+  let scored = 0, sumI = 0, sumC = 0, maxG = -Infinity;
+  sl.forEach(id => {
+    const a = state.answers[id] || {};
+    if(a.importance != null && a.consistency != null){
+      scored++;
+      sumI += a.importance; sumC += a.consistency;
+      const g = a.importance - a.consistency;
+      if(g > maxG) maxG = g;
+    }
+  });
+  document.getElementById('s2Scored').textContent = scored + ' / ' + totalInS2;
+  document.getElementById('s2AvgI').textContent = scored ? (sumI / scored).toFixed(2) : '-';
+  document.getElementById('s2AvgC').textContent = scored ? (sumC / scored).toFixed(2) : '-';
+  const maxEl = document.getElementById('s2MaxG');
+  if(scored){
+    maxEl.textContent = String(maxG);
+    maxEl.classList.toggle('warn', maxG >= 2);
+    maxEl.classList.toggle('ok', maxG <= 0);
+  } else {
+    maxEl.textContent = '-';
+    maxEl.classList.remove('warn','ok');
+  }
+  document.getElementById('s2Bar').style.width = totalInS2 ? (scored / totalInS2 * 100).toFixed(1) + '%' : '0%';
+
+  // 同步按钮的 N（第一步中 mark=3 的总条目数）
+  const n3 = _allBankItems().filter(it => _isMark3(it.id)).length;
+  document.getElementById('s2N3').textContent = String(n3);
+}
+
+// 排序后的 shortlist（用于渲染 + 进入时初始化）
+function _sortedShortlist(){
+  const sl = (state.shortlist || []).slice();
+  const sort = state.ui.step2.sort || 'gap';
+  sl.sort((a, b) => {
+    if(sort === 'name'){
+      const na = (_itemById(a)?.name) || a;
+      const nb = (_itemById(b)?.name) || b;
+      return na.localeCompare(nb, 'zh');
+    }
+    if(sort === 'order') return 0;
+    if(sort === 'imp'){
+      return ((state.answers[b]?.importance ?? -1) - (state.answers[a]?.importance ?? -1));
+    }
+    if(sort === 'con'){
+      return ((state.answers[b]?.consistency ?? -1) - (state.answers[a]?.consistency ?? -1));
+    }
+    // default gap
+    const gA = _gapOf(a), gB = _gapOf(b);
+    if(gA == null && gB == null) return 0;
+    if(gA == null) return 1;     // 未打分放到后面
+    if(gB == null) return -1;
+    return gB - gA;
+  });
+  return sl;
+}
+
+function _renderS2Table(){
+  const empty = document.getElementById('s2Empty');
+  const tbody = document.getElementById('s2Body');
+  const sl = state.shortlist || [];
+  if(!sl.length){
+    empty.hidden = false;
+    tbody.innerHTML = '';
+    return;
+  }
+  empty.hidden = true;
+  const sorted = _sortedShortlist();
+  tbody.innerHTML = sorted.map((id, i) => {
+    const it = _itemById(id);
+    if(!it) return '';
+    const a = state.answers[id] || {};
+    const I = a.importance, C = a.consistency;
+    const orphan = !_isMark3(id);
+    const scoreBtns = (sel) => {
+      const all = [0,1,2,3,4,5];
+      return all.map(v => '<button type="button" data-v="'+v+'"'+(sel===v?' class="on"':'')+(sel==null&&v===0?' class="muted"':'') + '>'+v+'</button>').join('');
+    };
+    let gapHtml = '<span class="gp zero">未打分</span>';
+    if(I != null && C != null){
+      const g = I - C;
+      let cls = 'zero';
+      if(g >= 2) cls = (g >= 3 ? 'bad-huge' : 'bad');
+      else if(g === 1) cls = 'warn';
+      else if(g <= 0) cls = 'ok';
+      gapHtml = '<span class="gp '+cls+'">'+ (g>0?'+':'') + g + '</span>';
+    }
+    return '<tr data-id="'+_esc(id)+'"'+(orphan?' class="is-orphan"':'')+'>' +
+      '<td class="idx">'+(i+1)+'.</td>' +
+      '<td class="name">' +
+        '<span class="nm">'+_esc(it.name)+'</span>' +
+        (orphan ? ' <span class="rm-tag">已在第一步取消标记</span>' : '') +
+        (it.desc ? '<small class="dc">'+_esc(it.desc)+'</small>' : '') +
+      '</td>' +
+      '<td class="score-col"><div class="sc6 imp" data-field="importance">'+scoreBtns(I)+'</div></td>' +
+      '<td class="score-col"><div class="sc6 con" data-field="consistency">'+scoreBtns(C)+'</div></td>' +
+      '<td class="gap-col">'+gapHtml+'</td>' +
+      '<td class="op-col no-print"><button type="button" title="从第二步移出" aria-label="从第二步移出">×</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function _setScoreS2(id, field, v){
+  if(!state.answers[id]) state.answers[id] = { mark: 0, importance: null, consistency: null };
+  state.answers[id][field] = (state.answers[id][field] === v) ? null : v;
+  // 清理空条
+  const a = state.answers[id];
+  if(a.mark === 0 && a.importance == null && a.consistency == null) delete state.answers[id];
+  save();
+  _renderS2Stats();
+  _renderS2Table();
+  _renderS2Rank();
+}
+
+function _removeFromShortlist(id){
+  state.shortlist = (state.shortlist || []).filter(x => x !== id);
+  if(state.answers[id] && state.answers[id].mark === 0 && state.answers[id].importance == null && state.answers[id].consistency == null){
+    delete state.answers[id];
+  }
+  save();
+  _renderS2Stats();
+  _renderS2Table();
+  _renderS2Rank();
+  _renderS2Orphan();
+}
+
+function _clearAllScoresS2(){
+  if(!state.shortlist.length) return;
+  if(!confirm('清空第二步所有条目的「重要性 / 一致性」打分？\n（条目本身保留，分数清零）')) return;
+  state.shortlist.forEach(id => {
+    if(state.answers[id]){ state.answers[id].importance = null; state.answers[id].consistency = null; }
+  });
+  save();
+  _renderS2Stats();
+  _renderS2Table();
+  _renderS2Rank();
+}
+
+// 同步「非常重要」到 shortlist
+function syncFromStep1(){
+  const mark3 = _allBankItems().filter(it => _isMark3(it.id)).map(it => it.id);
+  const before = (state.shortlist || []).slice();
+  // 合并：mark3 全部进入 shortlist，但保留已有顺序（已有在前，新加 append）
+  const newOnes = mark3.filter(id => before.indexOf(id) < 0);
+  const dropped = before.filter(id => mark3.indexOf(id) < 0);
+  state.shortlist = before.concat(newOnes);
+  save();
+  _renderS2Stats();
+  _renderS2Table();
+  _renderS2Rank();
+  _renderS2Orphan();
+  // 提示
+  const msgs = [];
+  if(newOnes.length) msgs.push('新增 ' + newOnes.length + ' 条');
+  if(dropped.length) msgs.push('原有 ' + dropped.length + ' 条已不在「非常重要」保留，但仍在第二步（不会自动删除）');
+  _flashS2Msg(msgs.length ? msgs.join(' · ') : '没有变化');
+}
+
+function _flashS2Msg(text){
+  // 暂时共用 bankMsg 不合适；直接在工具栏右侧显示一次
+  const bar = document.getElementById('s2Bar');
+  // 用 progress bar 旁显示不可行，借用顶部 system 提示：临时插一个 hint
+  // 简单做法：在 s2-tools 上挂一个 note
+  let note = document.getElementById('s2Note');
+  if(!note){
+    note = document.createElement('span');
+    note.id = 's2Note';
+    note.style.cssText = 'margin-left:auto;font-size:12px;color:var(--c-imp);background:var(--c-imp-bg);border:1px solid var(--c-imp-bd);padding:3px 8px;border-radius:99px;';
+    const tools = document.querySelector('.s2-tools');
+    if(tools) tools.appendChild(note);
+  }
+  note.textContent = text;
+  clearTimeout(note._t);
+  note._t = setTimeout(() => { note.textContent = ''; }, 3500);
+}
+
+// "+ 从题库再加" 弹窗（只显示 mark=3 但不在 shortlist 的）
+function _openAddFromBankModal(){
+  const candidates = _allBankItems().filter(it => _isMark3(it.id) && (state.shortlist || []).indexOf(it.id) < 0);
+  if(!candidates.length){
+    _flashS2Msg('题库里没有「非常重要」但未在第二步的条目');
+    return;
+  }
+  const modal = document.createElement('div');
+  modal.className = 's2-addmodal no-print';
+  modal.innerHTML = '<div class="box">' +
+    '<h3>从「非常重要」再加条目 <small style="color:var(--muted);font-weight:400;font-size:12.5px;margin-left:6px">'+candidates.length+' 条候选（按分组）</small></h3>' +
+    '<ul>' + candidates.map(it =>
+      '<li data-id="'+_esc(it.id)+'"><input type="checkbox" checked><div><span class="nm">'+_esc(it.name)+'</span>'+(it.desc?'<small class="dc">'+_esc(it.desc)+'</small>':'')+'<small class="dc"><span class="gr">'+_esc(it.group)+'</span></small></div></li>'
+    ).join('') + '</ul>' +
+    '<div class="actions">' +
+      '<button type="button" class="btn ghost" id="s2AddCancel">取消</button>' +
+      '<button type="button" class="btn" id="s2AddAllNone">全不选</button>' +
+      '<button type="button" class="btn primary" id="s2AddConfirm">加入第二步</button>' +
+    '</div>' +
+  '</div>';
+  document.body.appendChild(modal);
+  const close = () => { document.body.removeChild(modal); };
+  document.getElementById('s2AddCancel').addEventListener('click', close);
+  document.getElementById('s2AddAllNone').addEventListener('click', () => {
+    modal.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
+  });
+  document.getElementById('s2AddConfirm').addEventListener('click', () => {
+    const picked = Array.from(modal.querySelectorAll('li')).filter(li => li.querySelector('input').checked).map(li => li.dataset.id);
+    if(!picked.length){ _flashS2Msg('未选择任何条目'); close(); return; }
+    picked.forEach(id => { if(state.shortlist.indexOf(id) < 0) state.shortlist.push(id); });
+    save();
+    _renderS2Stats(); _renderS2Table(); _renderS2Rank(); _renderS2Orphan();
+    _flashS2Msg('已加入 ' + picked.length + ' 条');
+    close();
+  });
+  // 点 li 切换 checkbox
+  modal.querySelectorAll('li').forEach(li => {
+    li.addEventListener('click', e => {
+      if(e.target.tagName === 'INPUT') return;
+      const cb = li.querySelector('input');
+      cb.checked = !cb.checked;
+    });
+  });
+}
+
+// 差距排行
+function _renderS2Rank(){
+  const wrap = document.getElementById('s2Rank');
+  const rows = (state.shortlist || []).map(id => {
+    const a = state.answers[id] || {};
+    const it = _itemById(id);
+    return { id, name: it?.name || id, imp: a.importance, con: a.consistency, gap: _gapOf(id) };
+  }).filter(r => r.gap != null)
+    .sort((a, b) => b.gap - a.gap);
+  if(!rows.length){
+    wrap.innerHTML = '<div style="font-size:13px;color:var(--muted)">还没有打出完整分数的条目。</div>';
+    return;
+  }
+  const maxAbs = Math.max(1, ...rows.map(r => Math.abs(r.gap)));
+  wrap.innerHTML = '<div class="s2-rank">' + rows.map((r, i) => {
+    const pct = Math.min(100, Math.abs(r.gap) / maxAbs * 100);
+    const cls = r.gap >= 2 ? '' : 'zero';
+    return '<div class="s2-rank-row">' +
+      '<span class="rank">#'+(i+1)+'</span>' +
+      '<span class="name">'+_esc(r.name)+'</span>' +
+      '<span class="nums">'+r.imp+' - '+r.con+'</span>' +
+      '<span class="nums">'+ (r.gap>0?'+':'') + r.gap +'</span>' +
+      '<span class="bar-wrap"><span class="bar-bar '+cls+'" style="width:'+pct.toFixed(1)+'%"></span></span>' +
+    '</div>';
+  }).join('') + '</div>';
+}
+
+// 孤儿卡片：在第一步取消「非常重要」标记
+function _renderS2Orphan(){
+  const orphans = (state.shortlist || []).filter(id => !_isMark3(id));
+  const card = document.getElementById('s2Orphan');
+  const list = document.getElementById('s2OrphanList');
+  if(!orphans.length){ card.hidden = true; list.innerHTML = ''; return; }
+  card.hidden = false;
+  list.innerHTML = orphans.map(id => {
+    const it = _itemById(id);
+    const a = state.answers[id] || {};
+    return '<li><b>'+_esc(it?.name || id)+'</b>' +
+      '<small style="color:var(--muted)">（当前 mark=' + (a.mark || 0) + '）</small>' +
+      '<span class="rm-tag">建议从第二步移出</span>' +
+      '<button type="button" class="btn ghost" data-rm="'+_esc(id)+'" style="font-size:11px;padding:2px 6px;color:var(--c3)">× 移出</button>' +
+    '</li>';
+  }).join('');
+  list.querySelectorAll('button[data-rm]').forEach(b => b.addEventListener('click', e => {
+    _removeFromShortlist(b.dataset.rm);
+  }));
+}
+
+// 表格内事件代理（打分 + 移除）
+document.getElementById('s2Table').addEventListener('click', e => {
+  // 0-5 钮
+  const btn = e.target.closest('.sc6 button');
+  if(btn){
+    const td = btn.closest('tr');
+    if(!td) return;
+    const wrap = btn.closest('.sc6');
+    _setScoreS2(td.dataset.id, wrap.dataset.field, Number(btn.dataset.v));
+    return;
+  }
+  // 移除钮
+  const op = e.target.closest('.op-col button');
+  if(op){
+    const tr = op.closest('tr');
+    if(!tr) return;
+    const id = tr.dataset.id;
+    const it = _itemById(id);
+    if(confirm('把「'+ (it?.name || id) +'」从第二步移出？\n（不会影响第一步的勾选）')){
+      _removeFromShortlist(id);
+    }
+  }
+});
+
+// 工具栏 + 头部操作
+document.getElementById('s2SyncBtn').addEventListener('click', syncFromStep1);
+document.getElementById('s2AddBtn').addEventListener('click', _openAddFromBankModal);
+document.getElementById('s2ClearAll').addEventListener('click', _clearAllScoresS2);
+document.getElementById('s2Sort').addEventListener('change', e => {
+  state.ui.step2.sort = e.target.value;
+  save(); _renderS2Table();
+});
+document.getElementById('s2NextBtn').addEventListener('click', () => go(3));
+
+// 步骤间来回切换不要清 shortlist（硬性约束 #5）：
+// setMarkS1 已更新 state.answers[id].mark；mark=3 → 其他时 _renderS2Orphan 列出孤儿，不自动删
+
+/* ===========================================================
+   M5 · 步骤③ · 结果与导出
+   =========================================================== */
+
+// 入口：刷新所有子模块
+function updateForStep3(){
+  _renderS3Summary();
+  _renderS3Groups();
+  _renderS3Core();
+  _renderS3All();
+  _renderS3Action();
+}
+
+// 全局统计 + 进度条
+function _renderS3Summary(){
+  const items = _allBankItems();
+  const total = items.length;
+  let n3=0, n2=0, n1=0;
+  items.forEach(it => {
+    const m = state.answers[it.id] && state.answers[it.id].mark;
+    if(m===3) n3++; else if(m===2) n2++; else if(m===1) n1++;
+  });
+  const done = n3 + n2 + n1;
+
+  // 第二步打分统计
+  const sl = state.shortlist || [];
+  let scored = 0, sumI = 0, sumC = 0, maxG = 0;
+  sl.forEach(id => {
+    const a = state.answers[id];
+    if(a && a.importance != null && a.consistency != null){
+      scored++;
+      sumI += a.importance; sumC += a.consistency;
+      const g = a.importance - a.consistency;
+      if(g > maxG) maxG = g;
+    }
+  });
+  const avgI = scored ? (sumI / scored) : null;
+  const avgC = scored ? (sumC / scored) : null;
+
+  const el = document.getElementById('s3Summary');
+  el.innerHTML =
+    '<div><small>勾选总数</small><b>' + done + ' / ' + total + '</b></div>' +
+    '<div><small>非常重要</small><b class="' + (n3?'':'muted') + '">' + n3 + '</b></div>' +
+    '<div><small>平均重要性</small><b class="' + (avgI==null?'muted':'') + '">' + (avgI==null?'-':avgI.toFixed(2)) + '</b></div>' +
+    '<div><small>平均一致性</small><b class="' + (avgC==null?'muted':'') + '">' + (avgC==null?'-':avgC.toFixed(2)) + '</b></div>' +
+    '<div><small>最大差距</small><b class="' + (scored?(maxG>=2?'warn':(maxG<=0?'ok':'')):'muted') + '">' + (scored?(maxG>0?'+':'')+maxG:'-') + '</b></div>';
+
+  document.getElementById('s3Bar').style.width = (done / total * 100).toFixed(1) + '%';
+}
+
+// 各分组勾选分布
+function _renderS3Groups(){
+  const wrap = document.getElementById('s3Groups');
+  const groups = state.bank.groups;
+  // 计算每组的三档分布
+  const data = groups.map(g => {
+    let n3=0, n2=0, n1=0;
+    _allBankItems().filter(it => it.group === g).forEach(it => {
+      const m = state.answers[it.id] && state.answers[it.id].mark;
+      if(m===3) n3++; else if(m===2) n2++; else if(m===1) n1++;
+    });
+    const total = n3 + n2 + n1;
+    return { g, n3, n2, n1, total };
+  });
+  wrap.innerHTML = '<div class="s3-groups">' + data.map(d => {
+    const t = Math.max(1, d.total);
+    const w3 = (d.n3 / t * 100).toFixed(1);
+    const w2 = (d.n2 / t * 100).toFixed(1);
+    const w1 = (d.n1 / t * 100).toFixed(1);
+    return '<div class="s3-group-row">' +
+      '<span class="g-name">' + esc(d.g) + '</span>' +
+      '<span class="g-bar">' +
+        (d.n3 ? '<span class="g-seg d3" style="left:0;width:'+w3+'%"></span>' : '') +
+        (d.n2 ? '<span class="g-seg d2" style="left:'+w3+'%;width:'+w2+'%"></span>' : '') +
+        (d.n1 ? '<span class="g-seg d1" style="left:'+(+w3 + +w2).toFixed(1)+'%;width:'+w1+'%"></span>' : '') +
+      '</span>' +
+      '<span class="g-legend"><b>' + d.total + '</b> 条' +
+        (d.total ? ' · 3=<b style="color:var(--c3)">'+d.n3+'</b>' +
+                   ' · 2=<b style="color:var(--c2)">'+d.n2+'</b>' +
+                   ' · 1=<b style="color:var(--c1)">'+d.n1+'</b>' : '') +
+      '</span>' +
+    '</div>';
+  }).join('') + '</div>';
+}
+
+// 核心价值列表（按差距降序，含 orphan）
+function _renderS3Core(){
+  const wrap = document.getElementById('s3Core');
+  const sl = state.shortlist || [];
+  if(!sl.length){
+    wrap.innerHTML = '<div class="s3-core-empty">核心价值列表为空。<br>回第二步点「把非常重要同步到第二步」，并给至少一个条目打完整的两档分。</div>';
+    return;
+  }
+  const rows = sl.map(id => {
+    const it = _itemById(id);
+    const a = state.answers[id] || {};
+    return {
+      id, it,
+      mark: a.mark || 0,
+      imp: a.importance, con: a.consistency,
+      gap: _gapOf(id),
+      orphan: !_isMark3(id)
+    };
+  });
+  // 排序：未打分排后面；其他按 gap 降序
+  rows.sort((x, y) => {
+    if(x.gap == null && y.gap == null) return 0;
+    if(x.gap == null) return 1;
+    if(y.gap == null) return -1;
+    return y.gap - x.gap;
+  });
+  let html = '<table class="s3-core-table"><thead><tr>' +
+    '<th class="idx">#</th>' +
+    '<th>价值</th>' +
+    '<th>分组</th>' +
+    '<th class="num">重要</th>' +
+    '<th class="num">一致</th>' +
+    '<th class="gap-cell">差距</th>' +
+    '</tr></thead><tbody>';
+  rows.forEach((r, i) => {
+    let gapHtml = '<span class="gp zero">未打分</span>';
+    if(r.gap != null){
+      const g = r.gap;
+      let cls = 'zero';
+      if(g >= 2) cls = (g >= 3 ? 'bad-huge' : 'bad');
+      else if(g === 1) cls = 'warn';
+      else if(g <= 0) cls = 'ok';
+      gapHtml = '<span class="gp '+cls+'">'+ (g>0?'+':'') + g + '</span>';
+    }
+    const orphanTag = r.orphan ? ' <span class="rm-tag">第一步已取消</span>' : '';
+    html += '<tr' + (r.orphan?' class="is-orphan"':'') + '>' +
+      '<td class="idx">' + (i+1) + '.</td>' +
+      '<td class="name"><span class="nm">' + esc(r.it?.name || r.id) + orphanTag + '</span>' +
+        (r.it?.desc ? '<small class="dc">' + esc(r.it.desc) + '</small>' : '') +
+      '</td>' +
+      '<td class="s3-group-cell">' + esc(r.it?.group || '-') + '</td>' +
+      '<td class="num">' + (r.imp==null?'-':r.imp) + '</td>' +
+      '<td class="num">' + (r.con==null?'-':r.con) + '</td>' +
+      '<td class="gap-cell">' + gapHtml + '</td>' +
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+// 全部勾选清单（按档位分类、按分组展示）
+function _renderS3All(){
+  const wrap = document.getElementById('s3All');
+  const groups = state.bank.groups;
+  const buckets = [
+    { cls: 'd3', label: '非常重要', items: [] },
+    { cls: 'd2', label: '一般重要', items: [] },
+    { cls: 'd1', label: '完全不重要', items: [] }
+  ];
+  // 按 group 顺序收集
+  groups.forEach(g => {
+    _allBankItems().filter(it => it.group === g).forEach(it => {
+      const m = state.answers[it.id] && state.answers[it.id].mark;
+      if(m === 3) buckets[0].items.push(it);
+      else if(m === 2) buckets[1].items.push(it);
+      else if(m === 1) buckets[2].items.push(it);
+    });
+  });
+  let html = '';
+  buckets.forEach(b => {
+    if(!b.items.length) return;
+    html += '<div class="s3-all-sec"><div class="s3-all-head '+b.cls+'">' +
+      '<h3>' + b.label + '</h3>' +
+      '<span class="prog">' + b.items.length + ' 条</span>' +
+    '</div>';
+    // 再按 group 分块
+    const byG = {};
+    b.items.forEach(it => { (byG[it.group] = byG[it.group] || []).push(it); });
+    groups.forEach(g => {
+      if(!byG[g] || !byG[g].length) return;
+      byG[g].forEach((it, i) => {
+        html += '<div class="s3-all-row">' +
+          '<span class="id-num">' + (i+1) + '.</span>' +
+          '<div>' +
+            '<div class="nm">' + esc(it.name) + ' <span class="gr">'+esc(it.group)+'</span></div>' +
+            (it.desc ? '<span class="dc">' + esc(it.desc) + '</span>' : '') +
+          '</div>' +
+        '</div>';
+      });
+    });
+    html += '</div>';
+  });
+  if(!html){ html = '<div class="s3-all-empty">暂无勾选条目。回第一步开始勾选吧。</div>'; }
+  wrap.innerHTML = html;
+}
+
+// 行动建议：差距 top 3
+function _renderS3Action(){
+  const card = document.getElementById('s3ActionCard');
+  const wrap = document.getElementById('s3Action');
+  const tops = (state.shortlist || []).map(id => {
+    const a = state.answers[id] || {};
+    return { id, it: _itemById(id), imp: a.importance, con: a.consistency, gap: _gapOf(id) };
+  }).filter(r => r.gap != null && r.gap > 0)
+    .sort((a, b) => b.gap - a.gap)
+    .slice(0, 3);
+  if(!tops.length){ card.hidden = true; wrap.innerHTML = ''; return; }
+  card.hidden = false;
+  wrap.innerHTML = tops.map((r, i) => {
+    const rankCls = i === 0 ? '' : (i === 1 ? 'r2' : 'r3');
+    const suggest = (r.con != null && r.con <= 2) ?
+      '一致性偏低（'+r.con+'），考虑把更多日常行动对齐这个价值——例如选 1-2 件具体的事，未来一个月刻意去做。' :
+      (r.con != null && r.con <= 4) ?
+        '一致性中等（'+r.con+'），可以从「每周固定做一件和它相关的事」开始。' :
+        '重要性高但一致性偏低，先承认落差、把焦点放在「小而持续」的行动上。';
+    return '<div class="s3-action-item">' +
+      '<div class="ai-rank ' + rankCls + '">' + (i+1) + '</div>' +
+      '<div class="ai-body">' +
+        '<div class="ai-title">' + esc(r.it?.name || r.id) +
+          '<span class="gp">差距 +' + r.gap + '</span>' +
+        '</div>' +
+        '<div class="ai-desc">重要性 ' + r.imp + '，一致性 ' + r.con + '。' + suggest + '</div>' +
+        (r.it?.desc ? '<div class="ai-hint">' + esc(r.it.desc) + '</div>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ===========================================================
+   M5 · 导出 / 复制 / 打印 / 导入
+   =========================================================== */
+
+function _buildMarkdown(){
+  const items = _allBankItems();
+  const total = items.length;
+  let n3=0, n2=0, n1=0;
+  items.forEach(it => {
+    const m = state.answers[it.id] && state.answers[it.id].mark;
+    if(m===3) n3++; else if(m===2) n2++; else if(m===1) n1++;
+  });
+  const done = n3 + n2 + n1;
+  const sl = state.shortlist || [];
+  const scoredRows = sl.map(id => {
+    const a = state.answers[id] || {};
+    return { id, it: _itemById(id), imp: a.importance, con: a.consistency, gap: _gapOf(id), mark: a.mark || 0, orphan: !_isMark3(id) };
+  });
+  const scored = scoredRows.filter(r => r.gap != null).sort((a,b)=>b.gap-a.gap);
+  const avgI = scored.length ? (scored.reduce((s,r)=>s+r.imp,0)/scored.length).toFixed(2) : '-';
+  const avgC = scored.length ? (scored.reduce((s,r)=>s+r.con,0)/scored.length).toFixed(2) : '-';
+  const maxG = scored.length ? Math.max(...scored.map(r=>r.gap)) : 0;
+
+  const lines = [];
+  lines.push('# 价值观梳理结果');
+  lines.push('');
+  lines.push('> 生成于 ' + new Date().toLocaleString('zh-CN') + ' · 题库版本 ' + state.bank.version);
+  lines.push('');
+  lines.push('## 全局摘要');
+  lines.push('');
+  lines.push('| 指标 | 数值 |');
+  lines.push('|---|---|');
+  lines.push('| 勾选总数 | ' + done + ' / ' + total + ' |');
+  lines.push('| 非常重要 | ' + n3 + ' |');
+  lines.push('| 一般重要 | ' + n2 + ' |');
+  lines.push('| 完全不重要 | ' + n1 + ' |');
+  if(scored.length){
+    lines.push('| 已打分（第二步） | ' + scored.length + ' |');
+    lines.push('| 平均重要性 | ' + avgI + ' |');
+    lines.push('| 平均一致性 | ' + avgC + ' |');
+    lines.push('| 最大差距 | +' + maxG + ' |');
+  }
+  lines.push('');
+
+  // 分组概览
+  lines.push('## 各分组勾选分布');
+  lines.push('');
+  lines.push('| 分组 | 总数 | 非常重要 | 一般重要 | 完全不重要 |');
+  lines.push('|---|---|---|---|---|');
+  state.bank.groups.forEach(g => {
+    let a=0,b=0,c=0;
+    _allBankItems().filter(it => it.group === g).forEach(it => {
+      const m = state.answers[it.id] && state.answers[it.id].mark;
+      if(m===3) a++; else if(m===2) b++; else if(m===1) c++;
+    });
+    lines.push('| ' + g + ' | ' + (a+b+c) + ' | ' + a + ' | ' + b + ' | ' + c + ' |');
+  });
+  lines.push('');
+
+  // 核心价值清单
+  if(scoredRows.length){
+    lines.push('## 核心价值清单（按差距排序）');
+    lines.push('');
+    lines.push('| # | 价值词 | 重要性 | 一致性 | 差距 | 备注 |');
+    lines.push('|---|---|---|---|---|---|');
+    scoredRows.sort((a,b)=>{
+      if(a.gap==null && b.gap==null) return 0;
+      if(a.gap==null) return 1;
+      if(b.gap==null) return -1;
+      return b.gap-a.gap;
+    }).forEach((r, i) => {
+      const note = r.orphan ? '⚠️ 第一步已取消标记' : (r.gap==null ? '未打分' : '');
+      lines.push('| ' + (i+1) + ' | ' + (r.it?.name || r.id) + ' | ' + (r.imp==null?'-':r.imp) + ' | ' + (r.con==null?'-':r.con) + ' | ' + (r.gap==null?'-':(r.gap>0?'+':'')+r.gap) + ' | ' + note + ' |');
+    });
+    lines.push('');
+  }
+
+  // 行动建议
+  const tops = scored.filter(r => r.gap > 0).slice(0, 3);
+  if(tops.length){
+    lines.push('## 行动建议（差距 top 3）');
+    lines.push('');
+    tops.forEach((r, i) => {
+      lines.push((i+1) + '. **' + (r.it?.name || r.id) + '** — 重要性 ' + r.imp + '、一致性 ' + r.con + '、差距 +' + r.gap);
+      if(r.con != null && r.con <= 2){
+        lines.push('   一致性偏低，建议把 1-2 件具体行动与该价值对齐，未来一个月刻意去做。');
+      } else {
+        lines.push('   一致性中等偏下，可从「每周固定做一件和它相关的事」开始。');
+      }
+    });
+    lines.push('');
+  }
+
+  // 全部勾选清单（按档位）
+  const buckets = [
+    { label: '非常重要', mark: 3 },
+    { label: '一般重要', mark: 2 },
+    { label: '完全不重要', mark: 1 }
+  ];
+  buckets.forEach(b => {
+    const arr = [];
+    state.bank.groups.forEach(g => {
+      _allBankItems().filter(it => it.group === g && (state.answers[it.id]?.mark === b.mark)).forEach(it => arr.push(it));
+    });
+    if(!arr.length) return;
+    lines.push('## ' + b.label + '（' + arr.length + ' 条）');
+    lines.push('');
+    state.bank.groups.forEach(g => {
+      const inG = arr.filter(it => it.group === g);
+      if(!inG.length) return;
+      lines.push('**' + g + '**');
+      inG.forEach(it => lines.push('- ' + it.name + (it.desc ? ' · ' + it.desc : '')));
+      lines.push('');
+    });
+  });
+
+  lines.push('---');
+  lines.push('');
+  lines.push('*本文件由「价值观梳理工具」生成。数据存于浏览器本地，本文件可用于备份或跨设备迁移。*');
+  lines.push('');
+  return lines.join('\n');
+}
+
+function _buildTxt(){
+  // 纯文本版本（去除 Markdown 标记，但仍带结构）
+  const md = _buildMarkdown();
+  return md
+    .replace(/^#{1,6}\s+(.+)$/gm, '$1\n' + (s => '='.repeat(s.length)))
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/^>\s+(.+)$/gm, '  $1$')
+    .replace(/^\|.*\|$/gm, l => '  ' + l.replace(/^\|/,'').replace(/\|$/,'').split('|').map(c => c.trim()).filter(Boolean).join('  ·  '))
+    .replace(/^- /gm, '· ');
+}
+
+function _buildJson(){
+  // 与 save() 保持一致；保留 bankCustom 不变
+  return JSON.stringify({
+    schemaVersion: SCHEMA,
+    exportedAt: new Date().toISOString(),
+    bankName: state.bank.name,
+    bankVersion: state.bank.version,
+    step: state.step,
+    answers: state.answers,
+    shortlist: state.shortlist,
+    ui: state.ui,
+    bankCustom: state.bankCustom,
+    nextCustomId: state.nextCustomId,
+    updatedAt: state.updatedAt
+  }, null, 2);
+}
+
+function _exportFile(content, filename, mime){
+  const BOM = '\ufeff';
+  const blob = new Blob([BOM + content], { type: (mime || 'text/plain') + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 600);
+}
+
+function _flashExportMsg(text, cls){
+  const el = document.getElementById('s3ExportMsg');
+  el.textContent = text;
+  el.className = 's3-export-msg' + (cls ? ' ' + cls : '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.textContent = ''; el.className = 's3-export-msg'; }, 4500);
+}
+
+document.getElementById('s3ExportMd').addEventListener('click', () => {
+  _exportFile(_buildMarkdown(), 'values-' + _yyyymmdd() + '.md', 'text/markdown');
+  _flashExportMsg('已导出 Markdown', 'ok');
+});
+document.getElementById('s3ExportTxt').addEventListener('click', () => {
+  _exportFile(_buildTxt(), 'values-' + _yyyymmdd() + '.txt', 'text/plain');
+  _flashExportMsg('已导出纯文本', 'ok');
+});
+document.getElementById('s3ExportJson').addEventListener('click', () => {
+  _exportFile(_buildJson(), 'values-' + _yyyymmdd() + '.json', 'application/json');
+  _flashExportMsg('已导出答案 JSON（含完整 state）', 'ok');
+});
+document.getElementById('s3CopyMd').addEventListener('click', async () => {
+  const md = _buildMarkdown();
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(md);
+      _flashExportMsg('已复制到剪贴板（共 ' + md.length + ' 字）', 'ok');
+    } else {
+      // 降级到 textarea + execCommand
+      const ta = document.createElement('textarea');
+      ta.value = md; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if(ok) _flashExportMsg('已复制到剪贴板（降级方案）', 'ok');
+      else _flashExportMsg('浏览器不支持剪贴板，请手动选择', 'bad');
+    }
+  } catch(e){
+    _flashExportMsg('复制失败：' + (e.message || String(e)), 'bad');
+  }
+});
+document.getElementById('s3Print').addEventListener('click', () => {
+  _flashExportMsg('正在打开打印窗口…', 'ok');
+  setTimeout(() => window.print(), 100);
+});
+
+document.getElementById('s3Back2').addEventListener('click', () => go(2));
+document.getElementById('s3Back0').addEventListener('click', () => go(0));
+
+/* M5 · 导入答案 JSON（覆盖开始页与结果页的"导入答案"按钮） */
+function importAnswers(){
+  const file = document.getElementById('s3ImportFile');
+  file.value = ''; file.click();
+}
+function _handleImportFile(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => _handleImportText(reader.result);
+  reader.onerror = () => _flashExportMsg('文件读取失败', 'bad');
+  reader.readAsText(file, 'utf-8');
+}
+function _handleImportText(text){
+  let obj;
+  try{ obj = JSON.parse(text); }
+  catch(e){ _flashExportMsg('JSON 解析失败：' + (e.message || String(e)), 'bad'); return false; }
+  if(!obj || obj.schemaVersion !== SCHEMA){
+    _flashExportMsg('schemaVersion 不匹配（期望 ' + SCHEMA + '），导入中止', 'bad');
+    return false;
+  }
+  if(!obj.answers || typeof obj.answers !== 'object'){
+    _flashExportMsg('缺少 answers 字段', 'bad'); return false;
+  }
+  if(!confirm('导入将覆盖当前浏览器内全部数据（勾选、打分、第二步名单等），是否继续？')) return false;
+  state.answers = obj.answers || {};
+  state.shortlist = Array.isArray(obj.shortlist) ? obj.shortlist : [];
+  state.ui = (obj.ui && typeof obj.ui === 'object') ? obj.ui : { step1:{q:'',onlyUn:false,autoNext:true,dense:false,keyhintShown:false}, step2:{sort:'order'} };
+  state.bankCustom = Array.isArray(obj.bankCustom) ? obj.bankCustom : [];
+  state.nextCustomId = (typeof obj.nextCustomId === 'number' && obj.nextCustomId > 0) ? obj.nextCustomId : (state.bankCustom.length + 1);
+  save();
+  // 刷新所有视图
+  reRenderBank();
+  updateStatsS1();
+  updateForStep2();
+  if(state.step === 1) enterStep1();
+  if(state.step === 3) updateForStep3();
+  _flashExportMsg('导入完成 · 已恢复 ' + Object.keys(state.answers).length + ' 条勾选 / ' + state.shortlist.length + ' 条第二步', 'ok');
+  return true;
+}
+document.getElementById('s3ImportBtn').addEventListener('click', importAnswers);
+document.getElementById('s3ImportFile').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if(f) _handleImportFile(f);
+});
+
+function _visibleRowsS1(){
+  return Array.prototype.filter.call(
+    document.querySelectorAll('#s1List .s1-row'),
+    r => !r.classList.contains(_ROW_HIDE)
+  );
+}
+
+function applyFiltersS1(){
+  const q = (document.getElementById('s1Q').value || '').trim().toLowerCase();
+  const onlyUn = document.getElementById('s1OnlyUn').checked;
+  let shown = 0;
+  document.querySelectorAll('#s1List .s1-row').forEach(r => {
+    const hitQ = !q || (r.dataset.search || '').indexOf(q) > -1;
+    const hitU = !onlyUn || !r.dataset.v;
+    const vis = hitQ && hitU;
+    r.classList.toggle(_ROW_HIDE, !vis);
+    if(vis) shown++;
+  });
+  document.getElementById('s1Empty').classList.toggle('show', shown === 0);
+  document.querySelectorAll('#s1List .s1-sec').forEach(s => {
+    const any = s.querySelector('.s1-row:not(.hide)');
+    s.style.display = any ? '' : 'none';
+  });
+}
+
+function setMarkS1(id, v){
+  // v: 3 / 2 / 1 / 0；0 表示取消
+  if(!state.answers[id]) state.answers[id] = { mark: 0, importance: null, consistency: null };
+  const cur = state.answers[id].mark || 0;
+  state.answers[id].mark = (cur === v) ? 0 : v;
+  // 整条删除条件：mark=0 且 没有第二步分数
+  if(state.answers[id].mark === 0 && state.answers[id].importance == null && state.answers[id].consistency == null){
+    delete state.answers[id];
+  }
+  const row = document.querySelector('#s1List .s1-row[data-id="' + id + '"]');
+  if(row){
+    const m = state.answers[id] && state.answers[id].mark;
+    if(m && m >= 1) row.dataset.v = String(m);
+    else delete row.dataset.v;
+    const btns = row.querySelectorAll('.s1-opt');
+    btns.forEach(b => b.classList.toggle('on', Number(b.dataset.v) === m));
+  }
+  save(); updateStatsS1(); applyFiltersS1();
+  // M4：若当前在步骤②，mark 改了可能影响 orphan table，及时刷新
+  if(state.step === 2 && typeof updateForStep2 === 'function') updateForStep2();
+}
+
+function setDenseS1(on){
+  document.body.classList.toggle('dense', !!on);
+}
+
+/* ===========================================================
+   M3 · 自建题库 · 添加/编辑/删除 · 导入/导出/恢复
+   =========================================================== */
+
+function _makeCustomId(){
+  // 基于 nextCustomId，递增；保存时回填以防止空洞（删除后不会复用号码）
+  let n = state.nextCustomId || 1;
+  // 防御：万一被外部改成小于当前长度，跳过已被占用号
+  while(state.bankCustom.some(c => c.id === 'c' + String(n).padStart(3,'0'))){ n++; }
+  state.nextCustomId = n + 1;
+  return 'c' + String(n).padStart(3,'0');
+}
+
+// 渲染添加面板的分组下拉（首次进入步骤①时调用一次即可）
+function _initAddGroupSelect(){
+  const sel = document.getElementById('s1AddGroup');
+  if(!sel || sel.dataset.ready === '1') return;
+  sel.innerHTML = state.bank.groups.map(g => '<option value="' + esc(g) + '">' + esc(g) + '</option>').join('');
+  sel.value = state.bank.groups[0];
+  sel.dataset.ready = '1';
+}
+
+function _refreshAddCount(){
+  const n = (state.bankCustom || []).length;
+  document.getElementById('s1AddCount').textContent = '当前已加 ' + n + ' 条自建题';
+}
+
+function openAddPanel(){
+  const p = document.getElementById('s1AddPanel');
+  p.hidden = false;
+  _initAddGroupSelect();
+  _refreshAddCount();
+  document.getElementById('s1AddName').focus();
+}
+
+function closeAddPanel(){
+  document.getElementById('s1AddPanel').hidden = true;
+  document.getElementById('s1AddMsg').textContent = '';
+  document.getElementById('s1AddOk').textContent = '';
+  document.getElementById('s1AddName').value = '';
+  document.getElementById('s1AddDesc').value = '';
+}
+
+function saveAddItem(){
+  const nameInput = document.getElementById('s1AddName');
+  const descInput = document.getElementById('s1AddDesc');
+  const sel       = document.getElementById('s1AddGroup');
+  const msg       = document.getElementById('s1AddMsg');
+  msg.textContent = '';
+  const name = (nameInput.value || '').trim();
+  const desc = (descInput.value || '').trim();
+  const group = sel.value || state.bank.groups[0];
+  if(!name){ msg.textContent = '请填写价值词'; nameInput.focus(); return; }
+  if(name.length > 12){ msg.textContent = '价值词不超过 12 字'; return; }
+  if(desc.length > 60){ msg.textContent = '释义不超过 60 字'; return; }
+  const dup = _allBankItems().some(it => it.name.trim() === name);
+  if(dup){ msg.textContent = '已存在同名价值词，请换一个'; return; }
+  const id = _makeCustomId();
+  state.bankCustom.push({ id, group, name, desc, custom: true });
+  save(); reRenderBank(); closeAddPanel();
+  _flashBankMsg('已添加：' + name + ' · ' + id);
+  // 滚动到新加的那一行
+  setTimeout(() => {
+    const row = document.querySelector('#s1List .s1-row[data-id="' + id + '"]');
+    if(row){ row.scrollIntoView({block:'center', behavior:'smooth'}); row.classList.add('flash'); setTimeout(()=>row.classList.remove('flash'), 1200); }
+  }, 60);
+}
+
+function restoreBank(){
+  const n = (state.bankCustom || []).length;
+  if(n === 0){ _flashBankMsg('没有自建题可恢复'); return; }
+  const nShort = state.shortlist.filter(id => state.bankCustom.some(c => c.id === id)).length;
+  const nAns = Object.keys(state.answers).filter(id => state.bankCustom.some(c => c.id === id)).length;
+  let msg = '将删除全部 ' + n + ' 条自建题';
+  if(nAns) msg += '、清理对应 ' + nAns + ' 条勾选/打分';
+  if(nShort) msg += '、从第二步名单移除 ' + nShort + ' 条';
+  msg += '。此操作不可撤销，继续？';
+  if(!confirm(msg)) return;
+  state.bankCustom.forEach(c => {
+    delete state.answers[c.id];
+  });
+  state.shortlist = state.shortlist.filter(id => !state.bankCustom.some(c => c.id === id));
+  state.bankCustom = [];
+  state.nextCustomId = 1;
+  save(); reRenderBank();
+  _flashBankMsg('已恢复默认题库（清空 ' + n + ' 条自建）');
+}
+
+// 内部 helper：reRender Bank（清空 s1List 重建，保留 UI 控件值/滚动位置尽量）
+function reRenderBank(){
+  document.getElementById('s1List').dataset.rendered = '';
+  renderStep1();
+  applyFiltersS1();
+  updateStatsS1();
+}
+
+function buildBankJson(){
+  const items = _allBankItems().map(it => ({
+    id: it.id,
+    group: it.group,
+    name: it.name,
+    desc: it.desc || '',
+    custom: !!it.custom
+  }));
+  return JSON.stringify({
+    name: '价值观题库（导出）',
+    version: 'export',
+    generatedAt: new Date().toISOString(),
+    note: '包含默认题 + 自建题；导入时按 id 合并去重。',
+    groups: state.bank.groups,
+    items: items
+  }, null, 2);
+}
+
+function exportBank(){
+  const json = buildBankJson();
+  _downloadText(json, 'values-bank-export-' + _yyyymmdd() + '.json');
+  _flashBankMsg('已导出 ' + JSON.parse(json).items.length + ' 条（含 ' + (state.bankCustom || []).length + ' 条自建）');
+}
+
+// 处理导入：解析 + 合并
+function importBank(file){
+  if(!file){ return; }
+  const reader = new FileReader();
+  reader.onload = () => importBankText(reader.result);
+  reader.onerror = () => _flashBankMsg('文件读取失败');
+  reader.readAsText(file, 'utf-8');
+}
+
+function importBankText(text){
+  try{
+    const obj = JSON.parse(text);
+    if(!obj || !Array.isArray(obj.items)){ _flashBankMsg('文件格式不对：缺少 items 数组'); return { ok:false, error:'missing items' }; }
+    const groups = Array.isArray(obj.groups) && obj.groups.length ? obj.groups : state.bank.groups;
+    const defaultIds = new Set(state.bank.items.map(it => it.id));
+    let added = 0, updated = 0, skippedDefault = 0, invalid = 0;
+    obj.items.forEach(raw => {
+      if(!raw || typeof raw !== 'object'){ invalid++; return; }
+      if(!raw.id || !raw.name || !raw.group){ invalid++; return; }
+      if(groups.indexOf(raw.group) < 0){ raw.group = groups[0]; }
+      if(defaultIds.has(raw.id)){ skippedDefault++; return; }
+      const idx = state.bankCustom.findIndex(c => c.id === raw.id);
+      const item = { id: raw.id, group: raw.group, name: String(raw.name).slice(0,12), desc: String(raw.desc || '').slice(0,60), custom: true };
+      if(idx >= 0){ state.bankCustom[idx] = item; updated++; }
+      else { state.bankCustom.push(item); added++; }
+    });
+    state.bankCustom.sort((a, b) => {
+      const ga = groups.indexOf(a.group), gb = groups.indexOf(b.group);
+      return ga - gb || a.id.localeCompare(b.id);
+    });
+    save(); reRenderBank();
+    const msg = '导入完成：新增 ' + added + ' · 更新 ' + updated +
+      (skippedDefault ? ' · 跳过默认重复 ' + skippedDefault : '') +
+      (invalid ? ' · 无效 ' + invalid : '');
+    _flashBankMsg(msg);
+    return { ok:true, added, updated, skippedDefault, invalid };
+  }catch(err){
+    _flashBankMsg('解析失败：' + (err.message || String(err)));
+    return { ok:false, error: err.message || String(err) };
+  }
+}
+
+function editCustomItem(id){
+  const idx = state.bankCustom.findIndex(c => c.id === id);
+  if(idx < 0) return;
+  const it = state.bankCustom[idx];
+  const row = document.querySelector('#s1List .s1-row[data-id="' + id + '"]');
+  if(!row) return;
+  if(row.classList.contains('editing')) return;  // 已经在编辑中
+  // 退出其他行编辑态
+  document.querySelectorAll('#s1List .s1-row.editing').forEach(r => cancelEditCustom(r.dataset.id));
+  row.classList.add('editing');
+  const groupOpts = state.bank.groups.map(g =>
+    '<option value="'+esc(g)+'"'+(g===it.group?' selected':'')+'>'+esc(g)+'</option>'
+  ).join('');
+  row.querySelector('.s1-info').innerHTML =
+    '<div class="s1-edit">' +
+      '<input type="text" id="ed_'+id+'_name" value="'+esc(it.name)+'" maxlength="12" placeholder="价值词 ≤12字">' +
+      '<textarea id="ed_'+id+'_desc" rows="2" maxlength="60" placeholder="释义 ≤60字">'+esc(it.desc||'')+'</textarea>' +
+      '<div class="s1-edit-meta">' +
+        '<label>分组 <select id="ed_'+id+'_group">'+groupOpts+'</select></label>' +
+      '</div>' +
+      '<div class="s1-edit-actions">' +
+        '<button type="button" class="save" data-act="save">保存</button>' +
+        '<button type="button" class="cancel" data-act="cancel">取消</button>' +
+      '</div>' +
+    '</div>';
+  document.getElementById('ed_'+id+'_name').focus();
+  document.getElementById('ed_'+id+'_name').select();
+}
+
+function cancelEditCustom(id){
+  const row = document.querySelector('#s1List .s1-row[data-id="' + id + '"]');
+  if(!row) return;
+  const it = state.bankCustom.find(c => c.id === id);
+  if(!it) return;
+  // 还原 name/desc 显示
+  row.querySelector('.s1-info').innerHTML =
+    '<div class="s1-name">' + esc(it.name) + (it.custom ? ' <span class="s1-tag">自建</span>' : '') + '</div>' +
+    (it.desc ? '<div class="s1-def">' + esc(it.desc) + '</div>' : '');
+  row.classList.remove('editing');
+}
+
+function saveEditCustom(id){
+  const nm = document.getElementById('ed_' + id + '_name');
+  const dc = document.getElementById('ed_' + id + '_desc');
+  const gp = document.getElementById('ed_' + id + '_group');
+  if(!nm) return;
+  const name = (nm.value || '').trim();
+  const desc = (dc.value || '').trim();
+  const group = gp.value;
+  if(!name){ nm.focus(); return; }
+  if(name.length > 12){ alert('价值词不超过 12 字'); return; }
+  if(desc.length > 60){ alert('释义不超过 60 字'); return; }
+  // 重名检查（除自身外）
+  const dup = _allBankItems().some(it => it.id !== id && it.name.trim() === name);
+  if(dup){ alert('已存在同名价值词，请换一个'); return; }
+  const it = state.bankCustom.find(c => c.id === id);
+  if(!it) return;
+  it.name = name; it.desc = desc; it.group = group;
+  // 更新 search 索引供筛选
+  const row = document.querySelector('#s1List .s1-row[data-id="' + id + '"]');
+  if(row){ row.dataset.search = (name + ' ' + desc).toLowerCase(); row.dataset.sec = group; }
+  save(); reRenderBank();
+  _flashBankMsg('已更新：' + name);
+}
+
+function deleteCustomItem(id){
+  const it = state.bankCustom.find(c => c.id === id);
+  if(!it) return;
+  const hasMark = !!(state.answers[id] && state.answers[id].mark);
+  let msg = '删除自建题：' + it.name + '？';
+  if(hasMark) msg += '\n（它在第一步的勾选也会一起删除）';
+  if(state.shortlist.indexOf(id) >= 0) msg += '\n（它在第二步的名单里也会一起移除）';
+  if(!confirm(msg)) return;
+  state.bankCustom = state.bankCustom.filter(c => c.id !== id);
+  const a = state.answers[id];
+  if(a && a.mark === 0 && a.importance == null && a.consistency == null){
+    delete state.answers[id];
+  } else if(a){
+    // 即便保留打分，也清掉 mark（因为题已删）；保留打分给未来报告完整
+    // PRD 3.5：删除后从 answers 移除，所以这里直接删
+    delete state.answers[id];
+  }
+  state.shortlist = state.shortlist.filter(x => x !== id);
+  save(); reRenderBank();
+  _flashBankMsg('已删除：' + it.name);
+}
+
+// 顶部题库工具区消息闪烁提示
+let _bankMsgTimer = null;
+function _flashBankMsg(text){
+  const el = document.getElementById('s1BankMsg');
+  if(!el) return;
+  el.textContent = text;
+  clearTimeout(_bankMsgTimer);
+  _bankMsgTimer = setTimeout(() => { el.textContent = ''; }, 4500);
+}
+
+function _yyyymmdd(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+// BOM 头下载（PRD 要求 UTF-8 + BOM）
+function _downloadText(text, filename){
+  const BOM = '\ufeff';
+  const blob = new Blob([BOM + text], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 600);
+}
+
+// list 事件代理（编辑/删除）
+document.getElementById('s1List').addEventListener('click', e => {
+  // 编辑/删除
+  const actBtn = e.target.closest('.s1-act');
+  if(actBtn){
+    const row = actBtn.closest('.s1-row');
+    if(!row) return;
+    const id = row.dataset.id;
+    if(actBtn.classList.contains('edit')) editCustomItem(id);
+    else if(actBtn.classList.contains('del')) deleteCustomItem(id);
+    return;
+  }
+  // 编辑状态下的 save/cancel
+  const editBtn = e.target.closest('.s1-edit [data-act]');
+  if(editBtn){
+    const row = editBtn.closest('.s1-row');
+    if(!row) return;
+    const id = row.dataset.id;
+    if(editBtn.dataset.act === 'save') saveEditCustom(id);
+    else if(editBtn.dataset.act === 'cancel') cancelEditCustom(id);
+    return;
+  }
+  // 三档勾选
+  const btn = e.target.closest('.s1-opt');
+  if(!btn) return;
+  const row = btn.closest('.s1-row');
+  if(!row) return;
+  const before = row.dataset.v || '0';
+  const id = row.dataset.id;
+  setMarkS1(id, Number(btn.dataset.v));
+  const after = (state.answers[id] && state.answers[id].mark) ? String(state.answers[id].mark) : '0';
+  if(document.getElementById('s1AutoNext').checked && after !== '0' && after !== before){
+    const rows = _visibleRowsS1();
+    const k = rows.indexOf(row);
+    if(rows[k+1]) rows[k+1].focus();
+  }
+});
+
+document.getElementById('s1List').addEventListener('keydown', e => {
+  const row = e.target.closest('.s1-row');
+  if(!row) return;
+  const rows = _visibleRowsS1();
+  const k = rows.indexOf(row);
+  const ch = e.key;
+  if(ch === '1' || ch === '2' || ch === '3'){
+    e.preventDefault();
+    setMarkS1(row.dataset.id, Number(ch));
+    if(document.getElementById('s1AutoNext').checked){
+      const next = rows[k+1];
+      if(next) next.focus();
+    }
+  } else if(ch === '0' || ch === 'Backspace' || ch === 'Delete'){
+    e.preventDefault();
+    setMarkS1(row.dataset.id, 0);
+  } else if(ch === 'ArrowDown'){
+    e.preventDefault();
+    if(rows[k+1]) rows[k+1].focus();
+  } else if(ch === 'ArrowUp'){
+    e.preventDefault();
+    if(rows[k-1]) rows[k-1].focus();
+  }
+});
+
+// 工具栏事件
+document.getElementById('s1Q').addEventListener('input', e => {
+  state.ui.step1.q = e.target.value;
+  save();
+  applyFiltersS1();
+});
+document.getElementById('s1Q').addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ e.preventDefault(); e.target.value = ''; state.ui.step1.q = ''; save(); applyFiltersS1(); }
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    const first = document.querySelector('#s1List .s1-row:not(.hide)');
+    if(first){ first.focus(); first.classList.add('is-focused'); }
+  }
+});
+document.getElementById('s1OnlyUn').addEventListener('change', e => {
+  state.ui.step1.onlyUn = e.target.checked;
+  save();
+  applyFiltersS1();
+});
+document.getElementById('s1AutoNext').addEventListener('change', e => {
+  state.ui.step1.autoNext = e.target.checked;
+  save();
+});
+document.getElementById('s1Dense').addEventListener('change', e => {
+  state.ui.step1.dense = e.target.checked;
+  save();
+  setDenseS1(e.target.checked);
+});
+
+function enterStep1(){
+  // 恢复 UI 控件值（与 state.ui.step1 同步），刷新统计，刷新筛选
+  const ui = state.ui.step1;
+  document.getElementById('s1Q').value = ui.q || '';
+  document.getElementById('s1OnlyUn').checked = !!ui.onlyUn;
+  document.getElementById('s1AutoNext').checked = ui.autoNext !== false;
+  document.getElementById('s1Dense').checked = !!ui.dense;
+  setDenseS1(!!ui.dense);
+  renderStep1();
+  updateStatsS1();
+  applyFiltersS1();
+  // 默认让首行 focus（如果还没有焦点）—— 让键盘提示立刻可用
+  if(!document.activeElement || document.activeElement === document.body){
+    const first = document.querySelector('#s1List .s1-row:not(.hide)');
+    if(first){
+      first.classList.add('is-focused');
+      first.focus({preventScroll:true});
+    }
+  }
+  // 首次进入时弹 onboarding 气泡（5 秒自动消失 + 点 ×）
+  if(!ui.keyhintShown){
+    setTimeout(_showOnboard, 250);
+  }
+}
+
+function _showOnboard(){
+  const el = document.getElementById('s1Onboard');
+  if(!el) return;
+  el.hidden = false;
+  const timer = setTimeout(_hideOnboard, 5000);
+  el.querySelector('#s1OnboardClose').onclick = () => { clearTimeout(timer); _hideOnboard(true); };
+}
+function _hideOnboard(permanent){
+  const el = document.getElementById('s1Onboard');
+  if(!el) return;
+  el.classList.add('fade');
+  setTimeout(() => { el.hidden = true; el.classList.remove('fade'); }, 450);
+  if(permanent !== false){
+    state.ui.step1.keyhintShown = true;
+    save();
+  }
+}
+
+/* ===========================================================
+   调试条 + 切换回归测试（M1 验收的自检工具）
+   =========================================================== */
+function debugTick(){
+  const ds = document.getElementById('dbStep');
+  if(ds) ds.textContent = NAMES[state.step] || state.step;
+  const sh = document.getElementById('dbShort');
+  if(sh) sh.textContent = state.shortlist.length;
+  const an = document.getElementById('dbAns');
+  if(an) an.textContent = Object.keys(state.answers).length;
+  const s = document.getElementById('dbStore');
+  if(s){
+    s.textContent = storeOK ? 'OK' : '禁用';
+    s.className = storeOK ? 'ok' : 'bad';
+  }
+}
+
+function vtTestToggle(){
+  // 切换 5 次：0 → 1 → 2 → 3 → 2 → 1 → 0
+  const before = JSON.stringify({step:state.step, shortlist:state.shortlist, answers:state.answers, ui:state.ui});
+  const seq = [1,2,3,2,1,0];
+  for(const s of seq) go(s);
+  const after = JSON.stringify({step:state.step, shortlist:state.shortlist, answers:state.answers, ui:state.ui});
+  const pass = before === after;
+  const res = document.getElementById('dbResults');
+  if(res){
+    res.innerHTML = '<div style="margin-top:6px">' +
+      (pass
+        ? '<b style="color:var(--ok)">✓ 切换 6 次（0→1→2→3→2→1→0），state 完全一致。</b> <a href="#" id="dbRun2" style="color:var(--accent);text-decoration:underline;margin-left:8px">再跑一次</a>'
+        : '<b style="color:var(--c3)">✗ 切换后 state 被改动</b><pre style="white-space:pre-wrap;margin:6px 0 0">'+esc(before)+'\n→\n'+esc(after)+'</pre><a href="#" id="dbRun2" style="color:var(--accent);text-decoration:underline">重试</a>') +
+      '</div>';
+    const r2 = document.getElementById('dbRun2');
+    if(r2) r2.addEventListener('click', function(e){ e.preventDefault(); vtTestToggle(); });
+  }
+  return pass;
+}
+
+/* M2 自检：依次检验渲染 / 勾选 / 搜索 / 筛选 / 密集模式 / 键盘流 / 切换保留 */
+async function vtSelfCheck(){
+  const log = [];
+  const ok = (n, c, d)=>log.push((c ? '✓ ' : '✗ ') + n + (d ? '  · ' + d : ''));
+
+  // 0) 进入第一步，触发 render
+  go(1);
+  await new Promise(r => setTimeout(r, 0));
+  const rows = document.querySelectorAll('#s1List .s1-row').length;
+  const secs = document.querySelectorAll('#s1List .s1-sec').length;
+  ok('渲染 s1-row 数 = ' + rows, rows === 154, '154 条');
+  ok('渲染分组数 = ' + secs, secs === 5, '5 组');
+
+  // 1) 给 v001 标非常重要的
+  setMarkS1('v001', 3);
+  ok('勾选 v001 = 非常重要', state.answers.v001 && state.answers.v001.mark === 3, 'state.answers.v001.mark = 3');
+  ok('DOM data-v=3 反映', document.querySelector('#s1List .s1-row[data-id="v001"]').dataset.v === '3');
+
+  // 2) 取消 v001
+  setMarkS1('v001', 0);
+  ok('取消 v001 → 整条从 state 移除', !state.answers.v001, 'state.answers.v001 消失');
+
+  // 3) 搜索「家庭」→ 应只剩 1 行（value group D-H v058）
+  document.getElementById('s1Q').value = '家庭';
+  document.getElementById('s1Q').dispatchEvent(new Event('input'));
+  await new Promise(r => setTimeout(r, 0));
+  const vis1 = Array.from(document.querySelectorAll('#s1List .s1-row')).filter(r => !r.classList.contains('hide')).length;
+  ok('搜索「家庭」命中 ' + vis1 + ' 行', vis1 === 1);
+
+  // 4) 清搜索 + 只看未选
+  document.getElementById('s1Q').value = '';
+  document.getElementById('s1Q').dispatchEvent(new Event('input'));
+  await new Promise(r => setTimeout(r, 0));
+  document.getElementById('s1OnlyUn').checked = true;
+  document.getElementById('s1OnlyUn').dispatchEvent(new Event('change'));
+  await new Promise(r => setTimeout(r, 0));
+  const vis2 = Array.from(document.querySelectorAll('#s1List .s1-row')).filter(r => !r.classList.contains('hide')).length;
+  ok('只看未选：所有 154 行可见（无勾选）', vis2 === 154);
+
+  // 5) 勾 v001 、「非常」 → 该行变隐藏（符合 onlyUn 筛选）
+  setMarkS1('v001', 3);
+  await new Promise(r => setTimeout(r, 0));
+  const v1hidden = document.querySelector('#s1List .s1-row[data-id="v001"]').classList.contains('hide');
+  ok('勾选后只在未选筛选下隐藏', v1hidden);
+
+  // 6) 关闭 onlyUn、密集模式
+  document.getElementById('s1OnlyUn').checked = false;
+  document.getElementById('s1OnlyUn').dispatchEvent(new Event('change'));
+  document.getElementById('s1Dense').checked = true;
+  document.getElementById('s1Dense').dispatchEvent(new Event('change'));
+  await new Promise(r => setTimeout(r, 0));
+  const denseHide = getComputedStyle(document.querySelector('#s1List .s1-row[data-id="v002"] .s1-def')).display === 'none';
+  ok('密集模式：释义隐藏', denseHide);
+
+  // 关闭密集恢复
+  document.getElementById('s1Dense').checked = false;
+  document.getElementById('s1Dense').dispatchEvent(new Event('change'));
+
+  // 7) 来回切 6 步：state 必须一致
+  const snap = JSON.stringify(state.answers) + '|' + JSON.stringify(state.ui);
+  for(const s of [2,3,2,1,0,1]) go(s);
+  ok('来回切换 6 步后 state 一致', (JSON.stringify(state.answers) + '|' + JSON.stringify(state.ui)) === snap);
+
+  // 恢复
+  setMarkS1('v001', 0);
+  document.getElementById('s1Q').value = '';
+
+  // 输出到调试条（不破坏 dbStep/dbShort/dbAns/dbStore 结构）
+  const res = document.getElementById('dbResults');
+  if(res){
+    const allOk = log.every(l => l[0]==='✓');
+    res.innerHTML =
+      '<div style="margin-top:6px"><b style="color:var(--'+ (allOk?'ok':'c3') +')">vtSelfCheck: '+
+      (allOk ? '全过 ✓' : '有失败') +
+      '</b></div>' +
+      log.map(l => '<div style="font:11.5px ui-monospace,monospace;margin-top:2px">' + l + '</div>').join('') +
+      '<div style="margin-top:8px"><a href="#" id="dbRun2" style="color:var(--accent);text-decoration:underline">再跑一次</a></div>';
+    const r2 = document.getElementById('dbRun2');
+    if(r2) r2.addEventListener('click', e=>{e.preventDefault(); vtSelfCheck();});
+  }
+  return log.every(l => l[0]==='✓');
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ===========================================================
+   启动
+   =========================================================== */
+load();
+renderBankOverview();
+
+// 步骤条点击
+document.querySelectorAll('.step').forEach(s => {
+  s.addEventListener('click', () => go(Number(s.dataset.step)));
+  s.addEventListener('keydown', e => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(Number(s.dataset.step)); }
+  });
+});
+
+document.getElementById('btnStart').addEventListener('click', () => go(1));
+document.getElementById('btnRestore').addEventListener('click', importAnswers);
+document.getElementById('btnResetAll').addEventListener('click', resetAll);
+
+/* ========== 浮动回到顶部按钮（滚动 > 200px 才显示） ========== */
+(function(){
+  const btn = document.getElementById('backToTop');
+  if(!btn) return;
+  let ticking = false;
+  function onScroll(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+      if(y > 200) btn.hidden = false;
+      else btn.hidden = true;
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive:true });
+  btn.addEventListener('click', () => {
+    try{ window.scrollTo({ top:0, behavior:'smooth' }); }
+    catch(e){ window.scrollTo(0, 0); }
+  });
+  // 初始化时检查一次（页面刷新后滚到中段的情况）
+  onScroll();
+})();
+
+// M3 · 题库管理按钮事件挂接
+document.getElementById('s1AddBtn').addEventListener('click', openAddPanel);
+document.getElementById('s1AddSave').addEventListener('click', saveAddItem);
+document.getElementById('s1AddCancel').addEventListener('click', closeAddPanel);
+document.getElementById('s1RestoreBankBtn').addEventListener('click', restoreBank);
+document.getElementById('s1ExportBankBtn').addEventListener('click', exportBank);
+document.getElementById('s1ImportBankBtn').addEventListener('click', () => {
+  const file = document.getElementById('s1ImportBankFile');
+  // 每次重置 value，让用户即便选同一个文件也能再次触发 change
+  file.value = ''; file.click();
+});
+document.getElementById('s1ImportBankFile').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if(f) importBank(f);
+});
+
+// 键盘 Ctrl+Enter 在添加面板里 = 保存
+document.getElementById('s1AddName').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); saveAddItem(); }
+});
+document.getElementById('s1AddDesc').addEventListener('keydown', e => {
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){ e.preventDefault(); saveAddItem(); }
+});
+
+// 键盘 ↑/← 切上一步，↓/→ 切下一步（不破坏 state）
+document.addEventListener('keydown', e => {
+  // 步骤① 全文捕获：/ 跳搜索；Escape 退出编辑/搜索回第一行
+  if(state.step === 1){
+    const t = e.target;
+    const isForm = t.matches && t.matches('input,textarea,select,button');
+    if(e.key === '/' && !isForm){
+      e.preventDefault();
+      const q = document.getElementById('s1Q');
+      q.focus(); q.select();
+      return;
+    }
+    if(e.key === 'Escape' && isForm && t.matches && t.matches('input[type="search"],textarea')){
+      e.preventDefault();
+      t.blur();
+      const first = document.querySelector('#s1List .s1-row:not(.hide)');
+      if(first) first.focus();
+      return;
+    }
+  }
+  if(e.altKey || e.ctrlKey || e.metaKey) return;
+  const t2 = e.target;
+  if(t2.matches && t2.matches('input,textarea,select,button')) return;
+  if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ e.preventDefault(); go(Math.max(0, state.step - 1)); }
+  else if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){ e.preventDefault(); go(Math.min(3, state.step + 1)); }
+});
+
+go(state.step || 0);
+
+// 调试条：本地访问时（localhost / file:）默认展开，否则隐藏。
+const isLocal = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+if(isLocal){
+  const db = document.getElementById('debugrp');
+  db.style.display = 'block';
+  debugTick();
+  document.getElementById('dbRun').addEventListener('click', e => { e.preventDefault(); vtTestToggle(); });
+  // 自动跑一次回归，让 M1 验收时一眼能看出结果
+  setTimeout(vtTestToggle, 50);
+}
+
+// 暴露给 console 便于手测
+window.__VT__ = { state, load, save, go, vtTestToggle, enterStep1, applyFiltersS1, updateStatsS1, setMarkS1, vtSelfCheck,
+  KEY, SCHEMA,
+  // M3 自建题管理
+  openAddPanel, closeAddPanel, saveAddItem, editCustomItem, cancelEditCustom, saveEditCustom, deleteCustomItem,
+  restoreBank, exportBank, buildBankJson, importBank, importBankText, reRenderBank,
+  _allBankItems,
+  // M4 第二步打分
+  updateForStep2, _renderS2Stats, _renderS2Table, _renderS2Rank, _renderS2Orphan,
+  syncFromStep1, _setScoreS2, _removeFromShortlist, _clearAllScoresS2,
+  _openAddFromBankModal, _gapOf, _itemById,
+  // M5 结果与导出
+  updateForStep3, _renderS3Summary, _renderS3Groups, _renderS3Core, _renderS3All, _renderS3Action,
+  _buildMarkdown, _buildTxt, _buildJson, _exportFile, importAnswers, _handleImportText
+};
+</script>
+</body>
+</html>

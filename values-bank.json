@@ -1,0 +1,1248 @@
+{
+  "schemaVersion": 1,
+  "name": "价值观题库",
+  "version": "1.0",
+  "generatedAt": "2026-10-16",
+  "note": "由 PRD v0.2 附录 A 生成，是题库的唯一来源。合并了 5 个重复价值词（冒险/诚实/可靠性/公平/热情）。",
+  "groups": [
+    "A—C",
+    "D—H",
+    "J—L",
+    "M—R",
+    "S—Z"
+  ],
+  "items": [
+    {
+      "id": "v001",
+      "group": "A—C",
+      "name": "丰富",
+      "desc": "让生活中充满受心灵驱动的体验",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v002",
+      "group": "A—C",
+      "name": "接受",
+      "desc": "接受周围的人和体验",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v003",
+      "group": "A—C",
+      "name": "责任",
+      "desc": "信守承诺",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v004",
+      "group": "A—C",
+      "name": "准确",
+      "desc": "正确或精确",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v005",
+      "group": "A—C",
+      "name": "成就",
+      "desc": "有成就，获得成功",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v006",
+      "group": "A—C",
+      "name": "宣传",
+      "desc": "促进项目或计划的发展",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v007",
+      "group": "A—C",
+      "name": "冒险",
+      "desc": "拥有冒险的体验，敢于冒可能出错的风险 ",
+      "custom": false,
+      "merged": true
+    },
+    {
+      "id": "v008",
+      "group": "A—C",
+      "name": "支援",
+      "desc": "对公共事务的支持",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v009",
+      "group": "A—C",
+      "name": "野心",
+      "desc": "表现出做某事的强烈愿望",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v010",
+      "group": "A—C",
+      "name": "认可",
+      "desc": "认可并享受某人或某物的优秀品质",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v011",
+      "group": "A—C",
+      "name": "自信",
+      "desc": "在考虑他人需求的同时为自己发声",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v012",
+      "group": "A—C",
+      "name": "吸引力",
+      "desc": "对他人有吸引力",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v013",
+      "group": "A—C",
+      "name": "诚实",
+      "desc": "对自己和他人都要诚实、真挚 ",
+      "custom": false,
+      "merged": true
+    },
+    {
+      "id": "v014",
+      "group": "A—C",
+      "name": "权威",
+      "desc": "有权力或能力控制他人",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v015",
+      "group": "A—C",
+      "name": "自治",
+      "desc": "独立自主，不受他人控制",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v016",
+      "group": "A—C",
+      "name": "觉悟",
+      "desc": "对自我和他人的认识和感知",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v017",
+      "group": "A—C",
+      "name": "平衡",
+      "desc": "挤出时间来完成必须做的事以及真心想做的事",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v018",
+      "group": "A—C",
+      "name": "美",
+      "desc": "欣赏身边高品质的东西",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v019",
+      "group": "A—C",
+      "name": "仁慈",
+      "desc": "多做对他人友好的行为",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v020",
+      "group": "A—C",
+      "name": "魄力",
+      "desc": "勇于承担风险，行事有信心，有勇气",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v021",
+      "group": "A—C",
+      "name": "沉着",
+      "desc": "不轻易动怒，不受强烈情绪的影响",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v022",
+      "group": "A—C",
+      "name": "关心",
+      "desc": "表现对他人的善意和关心",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v023",
+      "group": "A—C",
+      "name": "挑战",
+      "desc": "尝试超越自己能力的事情",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v024",
+      "group": "A—C",
+      "name": "改变",
+      "desc": "享受各种不同的情境和体验",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v025",
+      "group": "A—C",
+      "name": "慈善",
+      "desc": "为有需要的人提供帮助",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v026",
+      "group": "A—C",
+      "name": "乐观",
+      "desc": "用乐观的心态拥抱生活",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v027",
+      "group": "A—C",
+      "name": "聪明",
+      "desc": "机灵，有创造力，智慧，机智",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v028",
+      "group": "A—C",
+      "name": "合作",
+      "desc": "与他人合作，一起完成某项工作",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v029",
+      "group": "A—C",
+      "name": "舒适",
+      "desc": "拥有健康的体魄和优渥的物质生活",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v030",
+      "group": "A—C",
+      "name": "献身精神",
+      "desc": "献身于某项事业或活动",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v031",
+      "group": "A—C",
+      "name": "沟通",
+      "desc": "跟具有相似态度或兴趣的群体接触",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v032",
+      "group": "A—C",
+      "name": "同情心",
+      "desc": "顾及自己及他人的身心健康",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v033",
+      "group": "A—C",
+      "name": "信心",
+      "desc": "相信自己的能力",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v034",
+      "group": "A—C",
+      "name": "连贯性",
+      "desc": "坚守相同的原则或行动",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v035",
+      "group": "A—C",
+      "name": "贡献",
+      "desc": "为他人的利益出一份力",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v036",
+      "group": "A—C",
+      "name": "协作",
+      "desc": "为了共同的目标而与他人合作",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v037",
+      "group": "A—C",
+      "name": "勇气",
+      "desc": "对待事情有信心和勇气",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v038",
+      "group": "A—C",
+      "name": "礼节",
+      "desc": "对他人尊重，有礼貌",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v039",
+      "group": "A—C",
+      "name": "创造力",
+      "desc": "用新的方法表达思想",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v040",
+      "group": "A—C",
+      "name": "好奇心",
+      "desc": "有强烈的意愿去了解或学习新的事物",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v041",
+      "group": "A—C",
+      "name": "敢想敢做",
+      "desc": "有胆量，敢于冒险",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v042",
+      "group": "A—C",
+      "name": "决策力",
+      "desc": "迅速有效地做决定",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v043",
+      "group": "A—C",
+      "name": "忠诚",
+      "desc": "致力于某项任务或目标",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v044",
+      "group": "A—C",
+      "name": "可靠性",
+      "desc": "值得被依赖、值得他人信赖，有连续性 ",
+      "custom": false,
+      "merged": true
+    },
+    {
+      "id": "v045",
+      "group": "A—C",
+      "name": "变化",
+      "desc": "拥有广泛的经验和兴趣",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v046",
+      "group": "A—C",
+      "name": "义务",
+      "desc": "按照道德和法律规定行事",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v047",
+      "group": "D—H",
+      "name": "生态",
+      "desc": "尊重环境",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v048",
+      "group": "D—H",
+      "name": "共情",
+      "desc": "理解并顾及他人的感受",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v049",
+      "group": "D—H",
+      "name": "鼓励",
+      "desc": "给予他人支持、信心和希望",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v050",
+      "group": "D—H",
+      "name": "热情",
+      "desc": "以享受、兴趣和认可的方式参与，拥有强烈的情感或信仰 ",
+      "custom": false,
+      "merged": true
+    },
+    {
+      "id": "v051",
+      "group": "D—H",
+      "name": "道德规范",
+      "desc": "用道德原则约束自我的行为",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v052",
+      "group": "D—H",
+      "name": "优秀",
+      "desc": "以优秀的标准来规范自我的行为",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v053",
+      "group": "D—H",
+      "name": "兴奋",
+      "desc": "生活充满热情和刺激",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v054",
+      "group": "D—H",
+      "name": "表达能力",
+      "desc": "在行动中表达意义和情感",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v055",
+      "group": "D—H",
+      "name": "公平",
+      "desc": "对待他人公平、公正，按规则行事 ",
+      "custom": false,
+      "merged": true
+    },
+    {
+      "id": "v056",
+      "group": "D—H",
+      "name": "忠实",
+      "desc": "在忠诚和信任的基础上发展一段关系",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v057",
+      "group": "D—H",
+      "name": "名声",
+      "desc": "被许多人知道",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v058",
+      "group": "D—H",
+      "name": "家庭",
+      "desc": "拥有一个有凝聚力的、有爱的家庭",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v059",
+      "group": "D—H",
+      "name": "健身",
+      "desc": "从事体育活动，强健身体",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v060",
+      "group": "D—H",
+      "name": "灵活性",
+      "desc": "必要时愿意改变或妥协",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v061",
+      "group": "D—H",
+      "name": "注意力",
+      "desc": "专注于某项任务，不分心",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v062",
+      "group": "D—H",
+      "name": "原谅",
+      "desc": "对他人的不良情绪可以放手",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v063",
+      "group": "D—H",
+      "name": "自由",
+      "desc": "按照自己的意愿说话，行事，思考",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v064",
+      "group": "D—H",
+      "name": "友谊",
+      "desc": "拥有友好的关系，相互支持",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v065",
+      "group": "D—H",
+      "name": "乐趣",
+      "desc": "拥有轻松、积极、有趣的体验",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v066",
+      "group": "D—H",
+      "name": "慷慨",
+      "desc": "无私地分享",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v067",
+      "group": "D—H",
+      "name": "真实",
+      "desc": "真诚，诚实",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v068",
+      "group": "D—H",
+      "name": "成长",
+      "desc": "不断地发展和长进",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v069",
+      "group": "D—H",
+      "name": "健康",
+      "desc": "不生病，不受伤",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v070",
+      "group": "D—H",
+      "name": "乐于助人",
+      "desc": "随时准备为他人提供支持",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v071",
+      "group": "D—H",
+      "name": "希望",
+      "desc": "对未来充满积极的期望",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v072",
+      "group": "D—H",
+      "name": "谦虚",
+      "desc": "做人要有谦虚谨慎的态度",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v073",
+      "group": "D—H",
+      "name": "幽默",
+      "desc": "做个有趣的人，做些有趣的事",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v074",
+      "group": "D—H",
+      "name": "包容",
+      "desc": "允许别人的加入，对他人表示欢迎",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v075",
+      "group": "D—H",
+      "name": "独立",
+      "desc": "独自行事",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v076",
+      "group": "D—H",
+      "name": "个性",
+      "desc": "尊重自己区别于他人的品质和性格",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v077",
+      "group": "D—H",
+      "name": "行业",
+      "desc": "工作勤勉，尽责",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v078",
+      "group": "J—L",
+      "name": "内心的平静",
+      "desc": "体验内在的安宁",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v079",
+      "group": "J—L",
+      "name": "创新",
+      "desc": "追求并创造新的方法、观念和产品",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v080",
+      "group": "J—L",
+      "name": "启发",
+      "desc": "在外在的激发下去做一些有创意的事情",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v081",
+      "group": "J—L",
+      "name": "诚信",
+      "desc": "做事要守道德，要诚实",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v082",
+      "group": "J—L",
+      "name": "智力",
+      "desc": "获取并应用知识和技能",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v083",
+      "group": "J—L",
+      "name": "亲密关系",
+      "desc": "与他人分享亲密的联系",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v084",
+      "group": "J—L",
+      "name": "直觉",
+      "desc": "凭本能去理解事物",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v085",
+      "group": "J—L",
+      "name": "快乐",
+      "desc": "能让人感受到快乐的行动",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v086",
+      "group": "J—L",
+      "name": "善良",
+      "desc": "友好，慷慨，体贴",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v087",
+      "group": "J—L",
+      "name": "知识",
+      "desc": "广泛地认识事实，汲取信息",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v088",
+      "group": "J—L",
+      "name": "领导力",
+      "desc": "领导一群人或一个组织",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v089",
+      "group": "J—L",
+      "name": "学习",
+      "desc": "通过学习和体验来获取知识和技能",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v090",
+      "group": "J—L",
+      "name": "休闲",
+      "desc": "参加让人放松和恢复活力的活动",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v091",
+      "group": "J—L",
+      "name": "爱",
+      "desc": "与他人分享感情",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v092",
+      "group": "J—L",
+      "name": "专一",
+      "desc": "对他人表现出忠诚和支持",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v093",
+      "group": "M—R",
+      "name": "产生影响",
+      "desc": "对个人、境况或社会产生重大的影响",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v094",
+      "group": "M—R",
+      "name": "精通",
+      "desc": "在某一特定领域拥有全面的知识或技能",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v095",
+      "group": "M—R",
+      "name": "正念",
+      "desc": "有意识地拥抱当下，不加判断",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v096",
+      "group": "M—R",
+      "name": "温和",
+      "desc": "避免极端的行为或观点，寻找中间地带",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v097",
+      "group": "M—R",
+      "name": "一夫一妻制",
+      "desc": "只有一个长期的亲密伴侣",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v098",
+      "group": "M—R",
+      "name": "动机",
+      "desc": "带着热情参与各种活动",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v099",
+      "group": "M—R",
+      "name": "不墨守成规",
+      "desc": "不局限于大众普遍接受的行事方法或信仰",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v100",
+      "group": "M—R",
+      "name": "培育",
+      "desc": "关心、保护他人",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v101",
+      "group": "M—R",
+      "name": "思想开放",
+      "desc": "参考新的意见、想法或信仰",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v102",
+      "group": "M—R",
+      "name": "秩序",
+      "desc": "做事有条理，遵循预先确定的程序",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v103",
+      "group": "M—R",
+      "name": "耐心",
+      "desc": "等待期望中的结果，但不轻易激动",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v104",
+      "group": "M—R",
+      "name": "平和",
+      "desc": "以宁静而放松的方式生活",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v105",
+      "group": "M—R",
+      "name": "坚定",
+      "desc": "坚定不移地朝着既定目标努力",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v106",
+      "group": "M—R",
+      "name": "个人发展",
+      "desc": "有意识地追求个人成长",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v107",
+      "group": "M—R",
+      "name": "活泼",
+      "desc": "轻松愉快，充满情趣",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v108",
+      "group": "M—R",
+      "name": "欢愉",
+      "desc": "享受满足和快乐",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v109",
+      "group": "M—R",
+      "name": "团结",
+      "desc": "获得很多人的支持和倾慕",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v110",
+      "group": "M—R",
+      "name": "积极",
+      "desc": "对体验和个人具有积极的看法",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v111",
+      "group": "M—R",
+      "name": "权力",
+      "desc": "对他人具有影响力",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v112",
+      "group": "M—R",
+      "name": "准备",
+      "desc": "随时处于准备就绪的状态",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v113",
+      "group": "M—R",
+      "name": "主动性",
+      "desc": "主动把握，促使事情发生",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v114",
+      "group": "M—R",
+      "name": "目标",
+      "desc": "有一个具体的目标并为之努力",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v115",
+      "group": "M—R",
+      "name": "理性",
+      "desc": "行事有逻辑",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v116",
+      "group": "M—R",
+      "name": "现实",
+      "desc": "立足于实践和真理",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v117",
+      "group": "M—R",
+      "name": "关系",
+      "desc": "与他人建立连接",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v118",
+      "group": "M—R",
+      "name": "宗教",
+      "desc": "按照自己的宗教信仰行事",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v119",
+      "group": "M—R",
+      "name": "复原力",
+      "desc": "从困难和挑战中恢复如常",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v120",
+      "group": "M—R",
+      "name": "机敏",
+      "desc": "快速找到聪明的办法来解决问题",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v121",
+      "group": "M—R",
+      "name": "责任感",
+      "desc": "自己的行动值得别人依赖，能够肩负起责任",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v122",
+      "group": "M—R",
+      "name": "回应",
+      "desc": "随时可以轻松做出回应",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v123",
+      "group": "M—R",
+      "name": "浪漫",
+      "desc": "具有深沉而激动人心的爱的表现",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v124",
+      "group": "S—Z",
+      "name": "安全",
+      "desc": "有安全感，得到保护",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v125",
+      "group": "S—Z",
+      "name": "接受自己",
+      "desc": "接受自己，善待自己",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v126",
+      "group": "S—Z",
+      "name": "自我控制",
+      "desc": "控制自己的情绪、行为和欲望",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v127",
+      "group": "S—Z",
+      "name": "自尊",
+      "desc": "尊重自己，对自己的价值和能力有信心",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v128",
+      "group": "S—Z",
+      "name": "自我认知",
+      "desc": "了解自己的价值、能力和情绪",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v129",
+      "group": "S—Z",
+      "name": "服务",
+      "desc": "帮助他人，或者帮他人工作",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v130",
+      "group": "S—Z",
+      "name": "性生活",
+      "desc": "性生活令人满意",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v131",
+      "group": "S—Z",
+      "name": "简单",
+      "desc": "以最低的需求去生活",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v132",
+      "group": "S—Z",
+      "name": "孤独",
+      "desc": "远离他人，有自己独立的空间",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v133",
+      "group": "S—Z",
+      "name": "精神",
+      "desc": "接触更深层的意义和目标",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v134",
+      "group": "S—Z",
+      "name": "稳定",
+      "desc": "过着相当稳固的生活",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v135",
+      "group": "S—Z",
+      "name": "坚韧",
+      "desc": "遇到挑战时拥有稳定的情绪，不受打扰",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v136",
+      "group": "S—Z",
+      "name": "成功",
+      "desc": "完成一个目标，目的达成",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v137",
+      "group": "S—Z",
+      "name": "团队合作",
+      "desc": "跟团队一起工作",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v138",
+      "group": "S—Z",
+      "name": "体贴周到",
+      "desc": "考虑他人的需要",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v139",
+      "group": "S—Z",
+      "name": "宽容",
+      "desc": "尊重不同的意见和行为",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v140",
+      "group": "S—Z",
+      "name": "传统",
+      "desc": "遵循前辈的习俗",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v141",
+      "group": "S—Z",
+      "name": "透明度",
+      "desc": "开放，诚实，不遮遮掩掩",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v142",
+      "group": "S—Z",
+      "name": "信任",
+      "desc": "相信他人所说的真相",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v143",
+      "group": "S—Z",
+      "name": "值得信任",
+      "desc": "因为诚实真挚而获得信赖",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v144",
+      "group": "S—Z",
+      "name": "理解",
+      "desc": "对他人有同情心和包容心",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v145",
+      "group": "S—Z",
+      "name": "独特性",
+      "desc": "独一无二，特殊，不寻常",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v146",
+      "group": "S—Z",
+      "name": "多功能性",
+      "desc": "适应各种不同的功能或活动",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v147",
+      "group": "S—Z",
+      "name": "美德",
+      "desc": "行事依照高尚的道德标准",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v148",
+      "group": "S—Z",
+      "name": "愿景",
+      "desc": "思考将来，为将来做计划",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v149",
+      "group": "S—Z",
+      "name": "温暖",
+      "desc": "表达你的热情、爱意和仁慈",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v150",
+      "group": "S—Z",
+      "name": "财富",
+      "desc": "拥有大量宝贵的财富或金钱",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v151",
+      "group": "S—Z",
+      "name": "身心康健",
+      "desc": "舒适，健康，满足",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v152",
+      "group": "S—Z",
+      "name": "智慧",
+      "desc": "拥有经验、知识和良好的判断力",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v153",
+      "group": "S—Z",
+      "name": "世界和平",
+      "desc": "为创建更加和平与和谐的世界而努力",
+      "custom": false,
+      "merged": false
+    },
+    {
+      "id": "v154",
+      "group": "S—Z",
+      "name": "劲头",
+      "desc": "为某项事业付出大量的精力和热情",
+      "custom": false,
+      "merged": false
+    }
+  ]
+}
